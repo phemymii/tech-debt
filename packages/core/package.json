@@ -22,6 +22,15 @@
     "typescript": "^5.7.2"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phemymii/tech-debt.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/phemymii/tech-debt#readme",
+  "bugs": {
+    "url": "https://github.com/phemymii/tech-debt/issues"
+  },
   "engines": {
     "node": ">=18"
   }

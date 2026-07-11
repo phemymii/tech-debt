@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phemymii/tech-debt.git",
+    "directory": "packages/web"
+  },
+  "homepage": "https://github.com/phemymii/tech-debt#readme",
+  "bugs": {
+    "url": "https://github.com/phemymii/tech-debt/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

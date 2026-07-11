@@ -1,5 +1,5 @@
 {
-  "name": "tech-debt",
+  "name": "@hollyman/tech-debt",
   "version": "0.1.0",
   "description": "Interactive technical debt explorer — map TODO, FIXME, and @deprecated comments with git blame",
   "type": "module",
@@ -25,6 +25,18 @@
     "tech-debt"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phemymii/tech-debt.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/phemymii/tech-debt#readme",
+  "bugs": {
+    "url": "https://github.com/phemymii/tech-debt/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@tech-debt/core": "0.1.0",
     "@tech-debt/server": "0.1.0",

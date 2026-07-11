@@ -4,15 +4,24 @@
   "private": true,
   "description": "Interactive technical debt explorer for local codebases",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phemymii/tech-debt.git"
+  },
+  "homepage": "https://github.com/phemymii/tech-debt#readme",
+  "bugs": {
+    "url": "https://github.com/phemymii/tech-debt/issues"
+  },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @tech-debt/core && npm run build -w @tech-debt/web && npm run build -w @tech-debt/server && npm run build -w tech-debt",
+    "build": "npm run build -w @tech-debt/core && npm run build -w @tech-debt/web && npm run build -w @tech-debt/server && npm run build -w @hollyman/tech-debt",
     "dev": "npm run dev -w @tech-debt/web",
     "tech-debt": "node packages/cli/dist/index.js",
     "start": "npm run build && node packages/cli/dist/index.js",
-    "publish:packages": "npm run build && npm publish -w @tech-debt/core --access public && npm publish -w @tech-debt/server --access public && npm publish -w tech-debt --access public"
+    "publish:packages": "npm run build && npm publish -w @tech-debt/core --access public && npm publish -w @tech-debt/server --access public && npm publish -w @hollyman/tech-debt --access public",
+    "publish:cli": "npm run build -w @hollyman/tech-debt && npm publish -w @hollyman/tech-debt --access public"
   },
   "engines": {
     "node": ">=18"

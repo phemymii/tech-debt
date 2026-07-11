@@ -5,7 +5,7 @@ Interactive technical debt explorer for local codebases.
 Scan a project for `TODO`, `FIXME`, and `@deprecated` comments, enrich them with git blame (author + age), and open a local dashboard to make buried debt actionable.
 
 ```bash
-npx tech-debt
+npx @hollyman/tech-debt
 ```
 
 ## Why
@@ -16,16 +16,16 @@ TODOs get buried and forgotten. Visualizing them by age, author, and file turns 
 
 ```bash
 # Scan the current directory and open the dashboard
-npx tech-debt
+npx @hollyman/tech-debt
 
 # Point at another project
-npx tech-debt --project ../my-app
+npx @hollyman/tech-debt --project ../my-app
 
 # Print stats only (no UI)
-npx tech-debt --scan-only
+npx @hollyman/tech-debt --scan-only
 
 # Custom port / don't open browser
-npx tech-debt --port 4600 --no-open
+npx @hollyman/tech-debt --port 4600 --no-open
 ```
 
 Default UI: [http://localhost:4589](http://localhost:4589)
@@ -62,7 +62,7 @@ For each hit it records the message, file, line, and (when git is available) who
 
 | Package | Role |
 |---------|------|
-| `tech-debt` | CLI (`npx tech-debt`) |
+| `@hollyman/tech-debt` | CLI (`npx @hollyman/tech-debt`) |
 | `@tech-debt/core` | Comment scanner + git blame + aggregations |
 | `@tech-debt/server` | Local Fastify API + embedded UI |
 | `@tech-debt/web` | React dashboard (private; shipped inside server) |
