@@ -27,8 +27,11 @@ npx @hollyman/tech-debt --scan-only
 # Custom port / don't open browser
 npx @hollyman/tech-debt --port 4600 --no-open
 
-# CI gates (+ optional JSON)
-npx @hollyman/tech-debt --max-items 200 --fail-on-ancient --json
+# CI: fail if debt grows past limits
+npx @hollyman/tech-debt --max-items 200 --fail-on-ancient
+
+# Machine-readable summary
+npx @hollyman/tech-debt --scan-only --json
 ```
 
 Default UI: [http://localhost:4589](http://localhost:4589)
@@ -50,27 +53,53 @@ Default UI: [http://localhost:4589](http://localhost:4589)
 | `--fail-on-ancient` | off | Exit 1 if any ancient-age item exists |
 | `--include-triaged` | off | Include dismissed/snoozed items in scan-only / CI |
 
-CI flags imply a scan-only run. Triaged items are hidden from open counts by default (see `.tech-debt/state.json`).
+CI flags imply a scan-only run (you can omit `--scan-only`). Dismissed and snoozed items are excluded from open counts (and CI) by default.
 
 ## What it finds
 
-- `TODO`, `FIXME`, `HACK`, `XXX`, `BUG` across common comment styles
+- `TODO`, `FIXME`, `HACK`, `XXX`, `BUG` in `//`, `#`, `*`, and block comments
+- `<!-- … -->` markers in HTML / Markdown (plus Markdown checklist lines)
 - `@deprecated` in JSDoc / doc comments
-- Ticket keys (`ABC-123`, `#42`) and issue URLs — set `TECH_DEBT_TICKET_BASE` for key deep links
+- Ticket keys in messages (`ABC-123`, `#42`) and inline issue URLs
 
 For each hit it records the message, file, line, tickets, and (when git is available) who last touched that line and when.
 
+Deep-link Jira/Linear-style keys with:
+
+```bash
+TECH_DEBT_TICKET_BASE="https://linear.app/team/issue/{key}" npx @hollyman/tech-debt
+```
+
+GitHub `#123` links resolve from `origin` when it is a GitHub remote.
+
 ### Ignoring files
 
-Respects `.gitignore`, `.git/info/exclude`, and `.tech-debtignore` (last match wins), plus small built-in defaults for coverage / e2e / minified assets. See `.tech-debtignore.example`.
+Scanning respects, in order (last match wins):
+
+1. Built-in defaults (coverage, e2e runners, minified assets)
+2. `.gitignore`
+3. `.git/info/exclude`
+4. `.tech-debtignore` (project overrides)
+
+Copy `.tech-debtignore.example` to `.tech-debtignore` for project-specific paths:
+
+```gitignore
+src/generated/**
+fixtures/**
+!src/generated/keep.ts
+```
 
 ## Dashboard views
 
 - **Overview** — counts, age buckets, kind breakdown
-- **All debt** — searchable, filterable list, including **My debt** (git user)
+- **All debt** — searchable, filterable list, including **My debt** (your `git config` user)
 - **By author** — ownership of open debt
 - **Hotspots** — files with the most markers
-- **Inspector** — context, open in editor, dismiss / snooze triage
+- **Inspector** — full comment context, **Open in editor**, and local triage (dismiss / snooze)
+
+### Local triage
+
+From the Inspector you can **Dismiss** an item or **Snooze** it for 7 / 30 / 90 days. State lives in `.tech-debt/state.json` under the project root (commit it to share with the team, or gitignore for personal use). Use the **Triaged** chip on All debt to review and restore.
 
 ### Open in editor
 
