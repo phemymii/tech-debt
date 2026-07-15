@@ -2,13 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import type { ProjectConfig } from './types.js';
+import { loadIgnoreMatcher, type IgnoreMatcher } from './ignore.js';
 
 const SOURCE_EXTENSIONS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
   '.py', '.go', '.rs', '.java', '.kt', '.kts',
   '.swift', '.rb', '.php', '.cs', '.scala',
   '.vue', '.svelte', '.css', '.scss', '.sass', '.less',
-  '.html', '.htm',
+  '.html', '.htm', '.md', '.mdx',
   '.sh', '.bash', '.zsh', '.yml', '.yaml',
   '.sql', '.graphql', '.gql',
 ]);
@@ -44,6 +45,7 @@ const IGNORE_DIRS = new Set([
   '.parcel-cache',
   '.yarn',
   'storybook-static',
+  '.tech-debt',
 ]);
 
 export function discoverProject(root: string): ProjectConfig {
@@ -62,11 +64,17 @@ export function discoverProject(root: string): ProjectConfig {
 
 export function collectSourceFiles(root: string): string[] {
   const files: string[] = [];
-  walk(root, root, files);
+  const ignore = loadIgnoreMatcher(root);
+  walk(root, root, files, ignore);
   return files;
 }
 
-function walk(root: string, dir: string, out: string[]): void {
+function walk(
+  root: string,
+  dir: string,
+  out: string[],
+  ignore: IgnoreMatcher,
+): void {
   let entries: fs.Dirent[];
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -78,16 +86,19 @@ function walk(root: string, dir: string, out: string[]): void {
     if (entry.name.startsWith('.')) continue;
 
     const full = path.join(dir, entry.name);
+    const relative = path.relative(root, full).replace(/\\/g, '/');
 
     if (entry.isDirectory()) {
       if (IGNORE_DIRS.has(entry.name)) continue;
-      walk(root, full, out);
+      if (ignore.ignoresDirectory(relative)) continue;
+      walk(root, full, out, ignore);
       continue;
     }
 
     if (!entry.isFile()) continue;
     const ext = path.extname(entry.name).toLowerCase();
     if (!SOURCE_EXTENSIONS.has(ext)) continue;
+    if (ignore.ignores(relative)) continue;
     out.push(full);
   }
 }
@@ -119,6 +130,28 @@ function isInsideGitRepo(root: string): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+/** Local git identity used for “My debt” filtering. */
+export function getGitUser(
+  root: string,
+): { name: string; email: string } | null {
+  try {
+    const name = execFileSync('git', ['config', 'user.name'], {
+      cwd: root,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    const email = execFileSync('git', ['config', 'user.email'], {
+      cwd: root,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (!name && !email) return null;
+    return { name, email };
+  } catch {
+    return null;
   }
 }
 

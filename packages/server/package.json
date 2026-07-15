@@ -1,6 +1,6 @@
 {
   "name": "@tech-debt/server",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Fastify server for tech-debt explorer",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,7 +19,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@tech-debt/core": "0.1.0",
+    "@tech-debt/core": "0.1.3",
     "@fastify/cors": "^10.0.1",
     "@fastify/static": "^8.0.3",
     "@fastify/websocket": "^11.0.1",

@@ -1,0 +1,11 @@
+# Tech Debt ignore patterns (gitignore-style)
+# Also respects the project's .gitignore and .git/info/exclude.
+# Built-in defaults skip coverage, e2e runners, and minified assets.
+# Add project-specific paths here. Use ! to re-include.
+
+# Examples:
+# src/generated/**
+# **/*.generated.ts
+# fixtures/**
+# vendor/**
+# !src/critical-path.ts

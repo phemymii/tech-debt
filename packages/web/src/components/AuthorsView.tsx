@@ -1,10 +1,10 @@
 import { useExplorerStore } from '../store/explorer';
-import { formatAge, kindLabel } from '../utils/format';
+import { DEBT_KINDS, formatAge, kindLabel } from '../utils/format';
 
 export function AuthorsView() {
   const report = useExplorerStore((s) => s.report);
   const setViewMode = useExplorerStore((s) => s.setViewMode);
-  const setSearchQuery = useExplorerStore((s) => s.setSearchQuery);
+  const setFilterAuthor = useExplorerStore((s) => s.setFilterAuthor);
   const selectItem = useExplorerStore((s) => s.selectItem);
 
   if (!report) return null;
@@ -13,8 +13,15 @@ export function AuthorsView() {
 
   return (
     <div className="fade-up" style={{ maxWidth: 900, margin: '0 auto' }}>
-      <header style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+      <header style={{ marginBottom: 24 }}>
+        <h1
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            marginBottom: 4,
+            letterSpacing: '-0.03em',
+          }}
+        >
           By author
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
@@ -25,27 +32,26 @@ export function AuthorsView() {
       {report.authors.length === 0 ? (
         <Empty />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {report.authors.map((author) => (
             <button
               key={`${author.author}|${author.authorEmail}`}
               type="button"
               onClick={() => {
-                setSearchQuery(author.author);
+                setFilterAuthor(author.author);
                 setViewMode('items');
                 const first = author.items[0];
                 if (first) selectItem(first);
               }}
+              className="surface"
               style={{
                 display: 'block',
                 width: '100%',
                 textAlign: 'left',
-                padding: 16,
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-secondary)',
+                padding: 18,
                 cursor: 'pointer',
                 color: 'var(--text-primary)',
+                border: 'none',
               }}
             >
               <div
@@ -53,11 +59,17 @@ export function AuthorsView() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   gap: 12,
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>
+                  <div
+                    style={{
+                      fontWeight: 650,
+                      fontSize: 15,
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
                     {author.author}
                   </div>
                   {author.authorEmail && (
@@ -65,7 +77,8 @@ export function AuthorsView() {
                       style={{
                         fontSize: 11,
                         color: 'var(--text-muted)',
-                        marginTop: 2,
+                        marginTop: 3,
+                        fontFamily: 'var(--font-mono)',
                       }}
                     >
                       {author.authorEmail}
@@ -76,8 +89,9 @@ export function AuthorsView() {
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontWeight: 700,
-                    fontSize: 18,
+                    fontSize: 22,
                     color: 'var(--accent)',
+                    letterSpacing: '-0.03em',
                   }}
                 >
                   {author.total}
@@ -86,11 +100,11 @@ export function AuthorsView() {
 
               <div
                 style={{
-                  height: 6,
+                  height: 5,
                   borderRadius: 3,
                   background: 'var(--bg-tertiary)',
                   overflow: 'hidden',
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
                 <div
@@ -112,15 +126,11 @@ export function AuthorsView() {
                   flexWrap: 'wrap',
                 }}
               >
-                <span>
-                  {kindLabel('todo')} {author.byKind.todo}
-                </span>
-                <span>
-                  {kindLabel('fixme')} {author.byKind.fixme}
-                </span>
-                <span>
-                  {kindLabel('deprecated')} {author.byKind.deprecated}
-                </span>
+                {DEBT_KINDS.filter((k) => author.byKind[k] > 0).map((kind) => (
+                  <span key={kind}>
+                    {kindLabel(kind)} {author.byKind[kind]}
+                  </span>
+                ))}
                 <span>oldest {formatAge(author.oldestAgeDays)}</span>
                 <span>avg {formatAge(author.averageAgeDays)}</span>
               </div>
@@ -135,13 +145,11 @@ export function AuthorsView() {
 function Empty() {
   return (
     <div
+      className="surface"
       style={{
-        padding: 40,
+        padding: 48,
         textAlign: 'center',
         color: 'var(--text-muted)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        background: 'var(--bg-secondary)',
       }}
     >
       No author data yet. Run with git blame enabled inside a git repo.

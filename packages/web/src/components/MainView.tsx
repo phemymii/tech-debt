@@ -28,7 +28,7 @@ export function MainView() {
       style={{
         flex: 1,
         overflow: 'auto',
-        padding: 24,
+        padding: '28px 28px 40px',
       }}
     >
       {viewMode === 'overview' && <OverviewView />}

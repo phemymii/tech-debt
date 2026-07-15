@@ -18,7 +18,7 @@ export function ageBucketFromDays(days: number | null | undefined): AgeBucket {
 }
 
 export function emptyKindCounts(): Record<DebtKind, number> {
-  return { todo: 0, fixme: 0, deprecated: 0 };
+  return { todo: 0, fixme: 0, hack: 0, xxx: 0, bug: 0, deprecated: 0 };
 }
 
 export function emptyAgeCounts(): Record<AgeBucket, number> {
@@ -121,6 +121,7 @@ export function buildSearchIndex(items: DebtItem[]): SearchEntry[] {
       item.relativePath,
       item.blame?.author ?? '',
       item.raw,
+      ...(item.tickets?.map((t) => t.key) ?? []),
     ].filter(Boolean),
   }));
 }

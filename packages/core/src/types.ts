@@ -1,11 +1,17 @@
-export type DebtKind = 'todo' | 'fixme' | 'deprecated';
+export type DebtKind =
+  | 'todo'
+  | 'fixme'
+  | 'hack'
+  | 'xxx'
+  | 'bug'
+  | 'deprecated';
 
 export type AgeBucket =
-  | 'fresh'      // < 30 days
-  | 'recent'     // 30–90 days
-  | 'aging'      // 90–180 days
-  | 'stale'      // 180–365 days
-  | 'ancient'    // > 365 days
+  | 'fresh' // < 30 days
+  | 'recent' // 30–90 days
+  | 'aging' // 90–180 days
+  | 'stale' // 180–365 days
+  | 'ancient' // > 365 days
   | 'unknown';
 
 export interface BlameInfo {
@@ -15,6 +21,20 @@ export interface BlameInfo {
   ageDays: number;
   commitHash: string;
   summary?: string;
+}
+
+export interface TicketRef {
+  /** Display key, e.g. ABC-123, #42 */
+  key: string;
+  /** Absolute URL when known (inline URL, or resolved via base / GitHub remote) */
+  url?: string;
+}
+
+export interface DebtItemTriage {
+  status: 'dismissed' | 'snoozed';
+  until?: string;
+  note?: string;
+  updatedAt: string;
 }
 
 export interface DebtItem {
@@ -29,6 +49,9 @@ export interface DebtItem {
   context?: string;
   blame?: BlameInfo;
   ageBucket: AgeBucket;
+  tickets?: TicketRef[];
+  /** Present when the item is dismissed or actively snoozed */
+  triage?: DebtItemTriage;
 }
 
 export interface AuthorDebt {
@@ -62,6 +85,8 @@ export interface DebtStats {
   scanDurationMs: number;
   blameEnabled: boolean;
   blameCoverage: number; // 0–1
+  /** Count of dismissed/snoozed items hidden from the open set */
+  triagedHidden?: number;
 }
 
 export interface ProjectConfig {
@@ -95,6 +120,15 @@ export interface ScanOptions {
   changedFiles?: string[];
   /** Cache of previous items keyed by absolute file path */
   cache?: Map<string, DebtItem[]>;
+  /**
+   * Template for issue keys, e.g. `https://linear.app/team/issue/{key}`.
+   * Falls back to `TECH_DEBT_TICKET_BASE` env when omitted.
+   */
+  ticketBaseUrl?: string;
+  /** Apply `.tech-debt/state.json` triage (default true). */
+  applyTriage?: boolean;
+  /** When triage is applied, keep dismissed/snoozed items in the list. */
+  includeTriaged?: boolean;
 }
 
 export interface ScanProgress {
@@ -103,3 +137,13 @@ export interface ScanProgress {
   current?: number;
   total?: number;
 }
+
+/** All debt kinds in display order */
+export const DEBT_KINDS: DebtKind[] = [
+  'todo',
+  'fixme',
+  'hack',
+  'xxx',
+  'bug',
+  'deprecated',
+];

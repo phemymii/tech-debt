@@ -1,6 +1,6 @@
 {
   "name": "tech-debt-workspace",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
   "description": "Interactive technical debt explorer for local codebases",
   "license": "MIT",

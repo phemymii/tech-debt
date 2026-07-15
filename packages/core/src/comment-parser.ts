@@ -17,30 +17,69 @@ interface PatternDef {
   hasPrefix?: boolean;
 }
 
-const LINE_PATTERNS: PatternDef[] = [
-  { kind: 'todo', hasPrefix: true, regex: /^(\s*\/\/\/?!?\s*)TODO\b\s*:?\s*(.*)$/i },
-  { kind: 'fixme', hasPrefix: true, regex: /^(\s*\/\/\/?!?\s*)FIXME\b\s*:?\s*(.*)$/i },
-  { kind: 'todo', hasPrefix: true, regex: /^(\s*#\s*)TODO\b\s*:?\s*(.*)$/i },
-  { kind: 'fixme', hasPrefix: true, regex: /^(\s*#\s*)FIXME\b\s*:?\s*(.*)$/i },
-  { kind: 'todo', hasPrefix: true, regex: /^(\s*\*\s*)TODO\b\s*:?\s*(.*)$/i },
-  { kind: 'fixme', hasPrefix: true, regex: /^(\s*\*\s*)FIXME\b\s*:?\s*(.*)$/i },
-  { kind: 'deprecated', hasPrefix: true, regex: /^(\s*\*\s*)@deprecated\b\s*:?\s*(.*)$/i },
-  { kind: 'deprecated', hasPrefix: true, regex: /^(\s*\/\/\/?!?\s*)@deprecated\b\s*:?\s*(.*)$/i },
-  { kind: 'deprecated', hasPrefix: true, regex: /^(\s*#\s*)@deprecated\b\s*:?\s*(.*)$/i },
+const MARKERS: Array<{ kind: DebtKind; token: string }> = [
+  { kind: 'todo', token: 'TODO' },
+  { kind: 'fixme', token: 'FIXME' },
+  { kind: 'hack', token: 'HACK' },
+  { kind: 'xxx', token: 'XXX' },
+  { kind: 'bug', token: 'BUG' },
+  { kind: 'deprecated', token: '@deprecated' },
 ];
 
-const MARKDOWN_LINE_PATTERNS: PatternDef[] = [
-  { kind: 'todo', hasPrefix: true, regex: /^(\s*[-*]\s+(?:\[[ xX]\]\s*)?)TODO\b\s*:?\s*(.*)$/i },
-  { kind: 'fixme', hasPrefix: true, regex: /^(\s*[-*]\s+(?:\[[ xX]\]\s*)?)FIXME\b\s*:?\s*(.*)$/i },
-];
+function escapeToken(token: string): string {
+  return token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-const INLINE_PATTERNS: PatternDef[] = [
-  { kind: 'todo', regex: /<!--\s*TODO\b\s*:?\s*(.*?)-->/gi },
-  { kind: 'fixme', regex: /<!--\s*FIXME\b\s*:?\s*(.*?)-->/gi },
-  { kind: 'todo', regex: /\/\*+\s*TODO\b\s*:?\s*(.*?)(?:\*\/|$)/gi },
-  { kind: 'fixme', regex: /\/\*+\s*FIXME\b\s*:?\s*(.*?)(?:\*\/|$)/gi },
-  { kind: 'deprecated', regex: /\/\*+\s*@deprecated\b\s*:?\s*(.*?)(?:\*\/|$)/gi },
-];
+function buildLinePatterns(): PatternDef[] {
+  const prefixes = [
+    String.raw`(\s*\/\/\/?!?\s*)`,
+    String.raw`(\s*#\s*)`,
+    String.raw`(\s*\*\s*)`,
+  ];
+  const patterns: PatternDef[] = [];
+  for (const { kind, token } of MARKERS) {
+    const t = escapeToken(token);
+    for (const prefix of prefixes) {
+      patterns.push({
+        kind,
+        hasPrefix: true,
+        regex: new RegExp(`^${prefix}${t}\\b\\s*:?\\s*(.*)$`, 'i'),
+      });
+    }
+  }
+  return patterns;
+}
+
+function buildMarkdownLinePatterns(): PatternDef[] {
+  return MARKERS.filter((m) => m.kind !== 'deprecated').map(({ kind, token }) => ({
+    kind,
+    hasPrefix: true,
+    regex: new RegExp(
+      `^(\\s*[-*]\\s+(?:\\[[ xX]\\]\\s*)?)${escapeToken(token)}\\b\\s*:?\\s*(.*)$`,
+      'i',
+    ),
+  }));
+}
+
+function buildInlinePatterns(): PatternDef[] {
+  const patterns: PatternDef[] = [];
+  for (const { kind, token } of MARKERS) {
+    const t = escapeToken(token);
+    patterns.push({
+      kind,
+      regex: new RegExp(`<!--\\s*${t}\\b\\s*:?\\s*(.*?)-->`, 'gi'),
+    });
+    patterns.push({
+      kind,
+      regex: new RegExp(`\\/\\*+\\s*${t}\\b\\s*:?\\s*(.*?)(?:\\*\\/|$)`, 'gi'),
+    });
+  }
+  return patterns;
+}
+
+const LINE_PATTERNS = buildLinePatterns();
+const MARKDOWN_LINE_PATTERNS = buildMarkdownLinePatterns();
+const INLINE_PATTERNS = buildInlinePatterns();
 
 export function parseComments(content: string, filePath = ''): RawMatch[] {
   const lines = content.split(/\r?\n/);
@@ -57,7 +96,6 @@ export function parseComments(content: string, filePath = ''): RawMatch[] {
     const lineText = lines[i];
     for (const pattern of linePatterns) {
       const match = pattern.regex.exec(lineText);
-      // Reset sticky state for non-/g patterns reused across lines
       pattern.regex.lastIndex = 0;
       if (!match) continue;
 
@@ -120,6 +158,9 @@ function cleanMessage(text: string): string {
 
 function defaultMessage(kind: DebtKind): string {
   if (kind === 'deprecated') return 'Deprecated';
+  if (kind === 'hack') return 'Hack';
+  if (kind === 'xxx') return 'XXX';
+  if (kind === 'bug') return 'Bug';
   return '(no message)';
 }
 

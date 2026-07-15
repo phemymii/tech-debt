@@ -11,19 +11,20 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label="Toggle theme"
       style={{
-        width: 34,
-        height: 34,
-        borderRadius: 8,
-        border: '1px solid var(--border)',
-        background: 'var(--bg-secondary)',
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        border: 'none',
+        background: 'var(--bg-tertiary)',
         color: 'var(--text-secondary)',
         cursor: 'pointer',
         display: 'grid',
         placeItems: 'center',
         flexShrink: 0,
+        transition: 'background 0.15s, color 0.15s',
       }}
     >
-      {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+      {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
     </button>
   );
 }

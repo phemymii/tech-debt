@@ -4,6 +4,11 @@ import type { AgeBucket, DebtKind, DebtReport } from '@tech-debt/core';
 export type ViewMode = 'overview' | 'items' | 'authors' | 'files';
 export type Theme = 'light' | 'dark';
 
+export interface GitUser {
+  name: string | null;
+  email: string | null;
+}
+
 interface ExplorerState {
   report: DebtReport | null;
   loading: boolean;
@@ -13,6 +18,10 @@ interface ExplorerState {
   searchQuery: string;
   filterKind: DebtKind | 'all';
   filterAge: AgeBucket | 'all';
+  filterMine: boolean;
+  filterAuthor: string | null;
+  showTriaged: boolean;
+  gitUser: GitUser | null;
   theme: Theme;
 
   setReport: (report: DebtReport) => void;
@@ -23,6 +32,10 @@ interface ExplorerState {
   setSearchQuery: (query: string) => void;
   setFilterKind: (kind: DebtKind | 'all') => void;
   setFilterAge: (age: AgeBucket | 'all') => void;
+  setFilterMine: (mine: boolean) => void;
+  setFilterAuthor: (author: string | null) => void;
+  setShowTriaged: (show: boolean) => void;
+  setGitUser: (user: GitUser | null) => void;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
@@ -41,6 +54,10 @@ export const useExplorerStore = create<ExplorerState>((set, get) => ({
   searchQuery: '',
   filterKind: 'all',
   filterAge: 'all',
+  filterMine: false,
+  filterAuthor: null,
+  showTriaged: false,
+  gitUser: null,
   theme: savedTheme ?? 'light',
 
   setReport: (report) => set({ report, loading: false, scanning: false }),
@@ -51,6 +68,12 @@ export const useExplorerStore = create<ExplorerState>((set, get) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   setFilterKind: (kind) => set({ filterKind: kind }),
   setFilterAge: (age) => set({ filterAge: age }),
+  setFilterMine: (mine) =>
+    set({ filterMine: mine, filterAuthor: mine ? null : get().filterAuthor }),
+  setFilterAuthor: (author) =>
+    set({ filterAuthor: author, filterMine: author ? false : get().filterMine }),
+  setShowTriaged: (showTriaged) => set({ showTriaged }),
+  setGitUser: (gitUser) => set({ gitUser }),
   setTheme: (theme) => {
     localStorage.setItem('tech-debt-theme', theme);
     set({ theme });

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "entries": {
+    "packages/core/src/__fixtures__/sample.ts:9:hack:temporary cache bypass": {
+      "status": "snoozed",
+      "until": "2026-10-13T01:03:56.804Z",
+      "updatedAt": "2026-07-15T01:03:56.804Z",
+      "label": "hack: temporary cache bypass"
+    },
+    "packages/core/src/__fixtures__/sample.ts:7:todo:(abc-123): replace with async variant": {
+      "status": "dismissed",
+      "updatedAt": "2026-07-15T01:05:39.971Z",
+      "label": "todo: (ABC-123): replace with async variant"
+    },
+    "packages/core/src/__fixtures__/sample.ts:8:fixme:handle empty input #88": {
+      "status": "snoozed",
+      "until": "2026-07-22T01:05:42.339Z",
+      "updatedAt": "2026-07-15T01:05:42.339Z",
+      "label": "fixme: handle empty input #88"
+    },
+    "packages/core/src/__fixtures__/sample.ts:4:deprecated:use the new scanner api instead. see eng-42.": {
+      "status": "snoozed",
+      "until": "2026-07-22T01:07:02.608Z",
+      "updatedAt": "2026-07-15T01:07:02.608Z",
+      "label": "deprecated: Use the new scanner API instead. See ENG-42."
+    }
+  }
+}

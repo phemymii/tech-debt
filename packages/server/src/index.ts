@@ -12,9 +12,19 @@ import {
   getItemDetail,
   getFileDebt,
   getAuthorDebt,
+  loadIgnoreMatcher,
+  getGitUser,
+  applyTriageToReport,
+  loadTriageState,
+  saveTriageState,
+  dismissItem,
+  snoozeItem,
+  restoreItem,
+  triageKey,
   type DebtReport,
   type DebtItem,
 } from '@tech-debt/core';
+import { openInEditor } from './open-editor.js';
 
 export interface ServerOptions {
   projectRoot: string;
@@ -45,7 +55,10 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
   } = options;
 
   const app = Fastify({ logger: false });
+  /** Full scan without triage filtering (items may still lack triage annotations). */
+  let rawReport: DebtReport | null = null;
   let report: DebtReport | null = null;
+  let includeTriaged = false;
   const fileCache = new Map<string, DebtItem[]>();
   const wsClients = new Set<{ send: (data: string) => void }>();
 
@@ -64,17 +77,32 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
     });
   }
 
+  function presentReport(include = includeTriaged): DebtReport | null {
+    if (!rawReport) return null;
+    return applyTriageToReport(rawReport, loadTriageState(projectRoot), {
+      includeTriaged: include,
+    });
+  }
+
   async function doScan(
     incremental = false,
     changedFiles?: string[],
   ): Promise<DebtReport> {
-    report = await scanProject({
+    rawReport = await scanProject({
       root: projectRoot,
       blame,
       incremental,
       changedFiles,
       cache: fileCache,
+      applyTriage: false,
     });
+    report = presentReport()!;
+    return report;
+  }
+
+  function publishReport(): DebtReport {
+    report = presentReport()!;
+    broadcast({ type: 'report-update', data: report });
     return report;
   }
 
@@ -83,14 +111,27 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
     project: projectRoot,
   }));
 
-  app.get('/api/report', async () => {
-    if (!report) await doScan();
+  app.get('/api/me', async () => {
+    const user = getGitUser(projectRoot);
+    return user ?? { name: null, email: null };
+  });
+
+  app.get('/api/report', async (req) => {
+    if (!rawReport) await doScan();
+    const q = req.query as { triaged?: string };
+    const showTriaged = q.triaged === '1' || q.triaged === 'true';
+    includeTriaged = showTriaged;
+    report = presentReport(showTriaged)!;
     return report;
   });
 
   // Alias for familiarity with arch-atlas clients
-  app.get('/api/graph', async () => {
-    if (!report) await doScan();
+  app.get('/api/graph', async (req) => {
+    if (!rawReport) await doScan();
+    const q = req.query as { triaged?: string };
+    const showTriaged = q.triaged === '1' || q.triaged === 'true';
+    includeTriaged = showTriaged;
+    report = presentReport(showTriaged)!;
     return report;
   });
 
@@ -179,6 +220,89 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
     return { ok: true, stats: result.stats };
   });
 
+  app.get('/api/triage', async () => {
+    const state = loadTriageState(projectRoot);
+    return {
+      entries: state.entries,
+      count: Object.keys(state.entries).length,
+    };
+  });
+
+  app.post<{
+    Body: {
+      itemId?: string;
+      action?: 'dismiss' | 'snooze' | 'restore';
+      days?: number;
+      note?: string;
+      includeTriaged?: boolean;
+    };
+  }>('/api/triage', async (req) => {
+    if (!rawReport) await doScan();
+    const body = req.body ?? {};
+    const itemId = body.itemId;
+    const action = body.action;
+    if (!itemId || typeof itemId !== 'string') {
+      return { ok: false, error: 'Missing itemId' };
+    }
+    if (
+      action !== 'dismiss' &&
+      action !== 'snooze' &&
+      action !== 'restore'
+    ) {
+      return { ok: false, error: 'Invalid action' };
+    }
+
+    const item =
+      rawReport!.items.find((i) => i.id === itemId) ??
+      report?.items.find((i) => i.id === itemId);
+    if (!item) {
+      return { ok: false, error: 'Item not found' };
+    }
+
+    let state = loadTriageState(projectRoot);
+    if (action === 'dismiss') {
+      state = dismissItem(state, item, body.note);
+    } else if (action === 'snooze') {
+      const days = typeof body.days === 'number' ? body.days : 7;
+      state = snoozeItem(state, item, days, body.note);
+    } else {
+      state = restoreItem(state, item);
+    }
+    saveTriageState(projectRoot, state);
+
+    if (typeof body.includeTriaged === 'boolean') {
+      includeTriaged = body.includeTriaged;
+    }
+    const next = publishReport();
+    return {
+      ok: true,
+      key: triageKey(item),
+      action,
+      stats: next.stats,
+      report: next,
+    };
+  });
+
+  app.post<{
+    Body: { path?: string; line?: number; column?: number };
+  }>('/api/open', async (req) => {
+    const filePath = req.body?.path;
+    if (!filePath || typeof filePath !== 'string') {
+      return { ok: false, error: 'Missing path' };
+    }
+
+    const absolute = path.isAbsolute(filePath)
+      ? filePath
+      : path.join(projectRoot, filePath);
+
+    const line =
+      typeof req.body?.line === 'number' ? req.body.line : undefined;
+    const column =
+      typeof req.body?.column === 'number' ? req.body.column : undefined;
+
+    return openInEditor(absolute, projectRoot, { line, column });
+  });
+
   app.get('/ws', { websocket: true }, (socket) => {
     wsClients.add(socket);
     if (report) {
@@ -200,21 +324,30 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
 
   let watcher: FSWatcher | null = null;
   if (watch) {
+    const ignore = loadIgnoreMatcher(projectRoot);
+    const heavyDirs =
+      /(^|[/\\])(\.git|node_modules|dist|build|out|\.next|\.nuxt|coverage|android|ios|\.turbo|\.cache)([/\\]|$)/;
+
     watcher = chokidar.watch(projectRoot, {
-      ignored: [
-        /(^|[/\\])\../, // dotfiles/dirs
-        /node_modules/,
-        /\.git/,
-        /dist/,
-        /build/,
-        /out/,
-        /\.next/,
-        /coverage/,
-        /android/,
-        /ios/,
-        /\.turbo/,
-        /\.cache/,
-      ],
+      ignored: (watchedPath: string) => {
+        if (heavyDirs.test(watchedPath)) return true;
+        const base = path.basename(watchedPath);
+        if (base.startsWith('.') && watchedPath !== projectRoot) return true;
+
+        const relative = path
+          .relative(projectRoot, watchedPath)
+          .replace(/\\/g, '/');
+        if (!relative || relative === '.') return false;
+
+        try {
+          if (fs.existsSync(watchedPath) && fs.statSync(watchedPath).isDirectory()) {
+            return ignore.ignoresDirectory(relative);
+          }
+        } catch {
+          // path may vanish mid-watch
+        }
+        return ignore.ignores(relative);
+      },
       persistent: true,
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 },

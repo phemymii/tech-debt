@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useExplorerStore, type ViewMode } from '../store/explorer';
 import { rescan } from '../hooks/useDebtData';
-import { kindLabel } from '../utils/format';
+import { DEBT_KINDS, kindLabel } from '../utils/format';
 
 const NAV: Array<{ id: ViewMode; label: string; icon: typeof LayoutDashboard }> = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -24,19 +24,17 @@ export function Sidebar() {
 
   return (
     <aside
+      className="panel"
       style={{
-        width: 220,
+        width: 228,
         flexShrink: 0,
-        borderRight: '1px solid var(--border)',
-        background: 'var(--bg-glass)',
-        backdropFilter: 'blur(12px)',
         display: 'flex',
         flexDirection: 'column',
-        padding: 12,
+        padding: '16px 12px',
         gap: 4,
       }}
     >
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {NAV.map(({ id, label, icon: Icon }) => {
           const active = viewMode === id;
           return (
@@ -49,17 +47,19 @@ export function Sidebar() {
                 alignItems: 'center',
                 gap: 10,
                 padding: '10px 12px',
-                borderRadius: 8,
+                borderRadius: 10,
                 border: 'none',
                 cursor: 'pointer',
-                background: active ? 'var(--accent-soft)' : 'transparent',
+                background: active ? 'var(--nav-active)' : 'transparent',
                 color: active ? 'var(--accent)' : 'var(--text-secondary)',
                 fontWeight: active ? 600 : 500,
                 fontSize: 13,
                 textAlign: 'left',
+                letterSpacing: '-0.01em',
+                transition: 'background 0.15s, color 0.15s',
               }}
             >
-              <Icon size={16} />
+              <Icon size={16} strokeWidth={active ? 2.25 : 1.75} />
               {label}
             </button>
           );
@@ -70,8 +70,8 @@ export function Sidebar() {
         <div
           style={{
             marginTop: 'auto',
-            padding: 12,
-            borderRadius: 10,
+            padding: 14,
+            borderRadius: 12,
             background: 'var(--bg-tertiary)',
             fontSize: 12,
           }}
@@ -79,9 +79,9 @@ export function Sidebar() {
           <div
             style={{
               color: 'var(--text-muted)',
-              marginBottom: 8,
+              marginBottom: 10,
               fontWeight: 600,
-              letterSpacing: '0.04em',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               fontSize: 10,
             }}
@@ -89,18 +89,13 @@ export function Sidebar() {
             Snapshot
           </div>
           <StatRow label="Items" value={String(report.stats.totalItems)} />
-          <StatRow
-            label={kindLabel('todo')}
-            value={String(report.stats.byKind.todo)}
-          />
-          <StatRow
-            label={kindLabel('fixme')}
-            value={String(report.stats.byKind.fixme)}
-          />
-          <StatRow
-            label={kindLabel('deprecated')}
-            value={String(report.stats.byKind.deprecated)}
-          />
+          {DEBT_KINDS.filter((k) => report.stats.byKind[k] > 0).map((kind) => (
+            <StatRow
+              key={kind}
+              label={kindLabel(kind)}
+              value={String(report.stats.byKind[kind])}
+            />
+          ))}
           <StatRow label="Files" value={String(report.stats.totalFiles)} />
           <button
             type="button"
@@ -109,20 +104,21 @@ export function Sidebar() {
               await rescan();
             }}
             style={{
-              marginTop: 10,
+              marginTop: 12,
               width: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              padding: '8px 10px',
-              borderRadius: 8,
-              border: '1px solid var(--border)',
-              background: 'var(--bg-secondary)',
+              padding: '9px 10px',
+              borderRadius: 9,
+              border: 'none',
+              background: 'var(--bg-elevated)',
               color: 'var(--text-secondary)',
               cursor: 'pointer',
               fontSize: 12,
-              fontWeight: 500,
+              fontWeight: 560,
+              boxShadow: 'var(--shadow-soft)',
             }}
           >
             <RefreshCw size={13} />
@@ -140,7 +136,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
       style={{
         display: 'flex',
         justifyContent: 'space-between',
-        padding: '3px 0',
+        padding: '4px 0',
         color: 'var(--text-secondary)',
       }}
     >
@@ -150,6 +146,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
           fontFamily: 'var(--font-mono)',
           color: 'var(--text-primary)',
           fontWeight: 500,
+          fontSize: 12,
         }}
       >
         {value}

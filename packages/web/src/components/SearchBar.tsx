@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
-import { searchApi } from '../hooks/useDebtData';
-import { useExplorerStore } from '../store/explorer';
-import type { SearchEntry } from '@tech-debt/core';
-import { kindColor, kindLabel } from '../utils/format';
+import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import { searchApi } from "../hooks/useDebtData";
+import { useExplorerStore } from "../store/explorer";
+import type { SearchEntry } from "@tech-debt/core";
+import { kindColor, kindLabel } from "../utils/format";
 
 export function SearchBar() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchEntry[]>([]);
   const [open, setOpen] = useState(false);
   const selectItem = useExplorerStore((s) => s.selectItem);
@@ -26,17 +26,15 @@ export function SearchBar() {
   }, [query]);
 
   return (
-    <div style={{ position: 'relative', flex: 1, maxWidth: 480 }}>
+    <div style={{ position: "relative", flex: 1, maxWidth: 480 }}>
       <div
+        className="input-shell"
         style={{
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 8,
-          padding: '0 12px',
-          height: 36,
-          borderRadius: 8,
-          border: '1px solid var(--border)',
-          background: 'var(--bg-secondary)',
+          padding: "0 12px",
+          height: 38,
         }}
       >
         <Search size={14} color="var(--text-muted)" />
@@ -45,13 +43,13 @@ export function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search debt by message, file, or author…"
+          placeholder="Search message, file, or author…"
           style={{
             flex: 1,
-            border: 'none',
-            outline: 'none',
-            background: 'transparent',
-            color: 'var(--text-primary)',
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            color: "var(--text-primary)",
             fontSize: 13,
           }}
         />
@@ -60,39 +58,38 @@ export function SearchBar() {
       {open && results.length > 0 && (
         <div
           style={{
-            position: 'absolute',
-            top: 42,
+            position: "absolute",
+            top: 44,
             left: 0,
             right: 0,
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            borderRadius: 10,
-            boxShadow: 'var(--shadow)',
+            background: "var(--bg-elevated)",
+            borderRadius: 12,
+            boxShadow: "var(--shadow)",
             maxHeight: 320,
-            overflow: 'auto',
+            overflow: "auto",
             zIndex: 50,
+            padding: 6,
+            animation: "riseIn 0.18s ease both",
           }}
         >
           {results.map((r) => (
             <button
               key={r.id}
               type="button"
+              className="row-btn"
               onMouseDown={() => {
                 selectItem(r.id);
-                setViewMode('items');
-                setQuery('');
+                setViewMode("items");
+                setQuery("");
                 setOpen(false);
               }}
               style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 12px',
-                border: 'none',
-                borderBottom: '1px solid var(--border)',
-                background: 'transparent',
-                cursor: 'pointer',
-                color: 'var(--text-primary)',
+                display: "block",
+                width: "100%",
+                textAlign: "left",
+                padding: "10px 12px",
+                borderRadius: 8,
+                color: "var(--text-primary)",
               }}
             >
               <div
@@ -101,6 +98,8 @@ export function SearchBar() {
                   fontWeight: 600,
                   color: kindColor(r.kind),
                   marginBottom: 2,
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.02em",
                 }}
               >
                 {kindLabel(r.kind)}
@@ -108,9 +107,9 @@ export function SearchBar() {
               <div
                 style={{
                   fontSize: 13,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 {r.label}
@@ -118,8 +117,8 @@ export function SearchBar() {
               <div
                 style={{
                   fontSize: 11,
-                  color: 'var(--text-muted)',
-                  fontFamily: 'var(--font-mono)',
+                  color: "var(--text-muted)",
+                  fontFamily: "var(--font-mono)",
                   marginTop: 2,
                 }}
               >

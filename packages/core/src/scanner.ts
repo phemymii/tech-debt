@@ -11,6 +11,8 @@ import {
   buildSearchIndex,
   buildStats,
 } from './aggregate.js';
+import { extractTickets, resolveGithubIssuesBase } from './tickets.js';
+import { applyTriageToReport, loadTriageState } from './triage.js';
 import type {
   DebtItem,
   DebtReport,
@@ -30,6 +32,11 @@ export async function scanProject(
   onProgress?.({ phase: 'discover', message: 'Discovering project...' });
   const config = discoverProject(options.root);
   const shouldBlame = blameEnabled && config.isGitRepo;
+  const ticketBaseUrl =
+    options.ticketBaseUrl?.trim() ||
+    process.env.TECH_DEBT_TICKET_BASE?.trim() ||
+    undefined;
+  const githubIssuesBase = resolveGithubIssuesBase(config.root);
 
   let files: string[];
   if (options.incremental && options.changedFiles && options.cache) {
@@ -77,18 +84,25 @@ export async function scanProject(
         continue;
       }
 
-      const items: DebtItem[] = matches.map((m, idx) => ({
-        id: `debt:${relativePath}:${m.line}:${m.kind}:${idx}`,
-        kind: m.kind,
-        message: m.message,
-        raw: m.raw,
-        filePath,
-        relativePath,
-        line: m.line,
-        column: m.column,
-        context: m.context,
-        ageBucket: 'unknown' as const,
-      }));
+      const items: DebtItem[] = matches.map((m, idx) => {
+        const tickets = extractTickets(`${m.message} ${m.raw}`, {
+          ticketBaseUrl,
+          githubIssuesBase,
+        });
+        return {
+          id: `debt:${relativePath}:${m.line}:${m.kind}:${idx}`,
+          kind: m.kind,
+          message: m.message,
+          raw: m.raw,
+          filePath,
+          relativePath,
+          line: m.line,
+          column: m.column,
+          context: m.context,
+          ageBucket: 'unknown' as const,
+          ...(tickets.length > 0 ? { tickets } : {}),
+        };
+      });
 
       fileItems.set(filePath, items);
     } catch {
@@ -186,7 +200,7 @@ export async function scanProject(
       ? options.cache.size
       : files.length;
 
-  const report: DebtReport = {
+  let report: DebtReport = {
     config,
     items,
     authors: buildAuthors(items),
@@ -196,7 +210,16 @@ export async function scanProject(
     scannedAt: new Date().toISOString(),
   };
 
-  onProgress?.({ phase: 'done', message: `Found ${items.length} debt items` });
+  if (options.applyTriage !== false) {
+    report = applyTriageToReport(report, loadTriageState(config.root), {
+      includeTriaged: options.includeTriaged === true,
+    });
+  }
+
+  onProgress?.({
+    phase: 'done',
+    message: `Found ${report.items.length} debt items`,
+  });
   return report;
 }
 

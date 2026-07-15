@@ -26,15 +26,13 @@ export function App() {
       }}
     >
       <header
+        className="panel"
         style={{
-          height: 56,
+          height: 60,
           display: 'flex',
           alignItems: 'center',
-          gap: 16,
-          padding: '0 16px',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--bg-glass)',
-          backdropFilter: 'blur(16px)',
+          gap: 18,
+          padding: '0 20px',
           flexShrink: 0,
           zIndex: 10,
         }}
@@ -43,22 +41,36 @@ export function App() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             flexShrink: 0,
           }}
         >
           <img
             src="/favicon.svg"
             alt="Tech Debt"
-            width={32}
-            height={32}
-            style={{ borderRadius: 8, flexShrink: 0 }}
+            width={30}
+            height={30}
+            style={{ borderRadius: 9, flexShrink: 0 }}
           />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1 }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: '-0.03em',
+              }}
+            >
               Tech Debt
             </div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                marginTop: 2,
+                letterSpacing: '0.01em',
+              }}
+            >
               {report?.config.name ?? 'Technical Debt Explorer'}
             </div>
           </div>
@@ -71,11 +83,13 @@ export function App() {
           <div
             style={{
               fontSize: 11,
+              fontWeight: 500,
               color: 'var(--accent)',
               flexShrink: 0,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
+              gap: 7,
+              letterSpacing: '0.02em',
             }}
           >
             <div
