@@ -1,6 +1,6 @@
 {
   "name": "@tech-debt/web",
-  "version": "0.1.5",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "repository": {
@@ -18,7 +18,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tech-debt/core": "0.1.5",
+    "@tech-debt/core": "0.2.1",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.25.0",
     "react": "^19.2.8",
