@@ -21,6 +21,8 @@ import {
   snoozeItem,
   restoreItem,
   triageKey,
+  SOURCE_EXTENSIONS,
+  IGNORE_DIRS,
   type DebtReport,
   type DebtItem,
 } from '@tech-debt/core';
@@ -323,70 +325,6 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
   }
 
   let watcher: FSWatcher | null = null;
-  if (watch) {
-    const ignore = loadIgnoreMatcher(projectRoot);
-    const heavyDirs =
-      /(^|[/\\])(\.git|node_modules|dist|build|out|\.next|\.nuxt|coverage|android|ios|\.turbo|\.cache)([/\\]|$)/;
-
-    watcher = chokidar.watch(projectRoot, {
-      ignored: (watchedPath: string) => {
-        if (heavyDirs.test(watchedPath)) return true;
-        const base = path.basename(watchedPath);
-        if (base.startsWith('.') && watchedPath !== projectRoot) return true;
-
-        const relative = path
-          .relative(projectRoot, watchedPath)
-          .replace(/\\/g, '/');
-        if (!relative || relative === '.') return false;
-
-        try {
-          if (fs.existsSync(watchedPath) && fs.statSync(watchedPath).isDirectory()) {
-            return ignore.ignoresDirectory(relative);
-          }
-        } catch {
-          // path may vanish mid-watch
-        }
-        return ignore.ignores(relative);
-      },
-      persistent: true,
-      ignoreInitial: true,
-      awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 },
-      ignorePermissionErrors: true,
-    });
-
-    watcher.on('error', (err: unknown) => {
-      // Don't crash the dashboard if the OS hits file-watch limits
-      const message = err instanceof Error ? err.message : String(err);
-      console.error('[tech-debt] watcher error:', message);
-    });
-
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const pendingChanges = new Set<string>();
-
-    const handleChange = (filePath: string) => {
-      pendingChanges.add(filePath);
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async () => {
-        const changed = [...pendingChanges];
-        pendingChanges.clear();
-        broadcast({ type: 'scanning', changed });
-        try {
-          const result = await doScan(true, changed);
-          broadcast({ type: 'report-update', data: result });
-        } catch (err) {
-          console.error(
-            '[tech-debt] rescan failed:',
-            err instanceof Error ? err.message : err,
-          );
-          broadcast({ type: 'scanning', changed: [] });
-        }
-      }, 500);
-    };
-
-    watcher.on('change', handleChange);
-    watcher.on('add', handleChange);
-    watcher.on('unlink', handleChange);
-  }
 
   app.setNotFoundHandler(async (req, reply) => {
     if (req.url.startsWith('/api/') || req.url.startsWith('/ws')) {
@@ -405,6 +343,28 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
   await app.listen({ port, host: '127.0.0.1' });
   const url = `http://localhost:${port}`;
 
+  if (watch) {
+    watcher = startProjectWatcher({
+      projectRoot,
+      onChange: async (changed) => {
+        broadcast({ type: 'scanning', changed });
+        try {
+          const result = await doScan(true, changed);
+          broadcast({ type: 'report-update', data: result });
+        } catch (err) {
+          console.error(
+            '[tech-debt] rescan failed:',
+            err instanceof Error ? err.message : err,
+          );
+          broadcast({ type: 'scanning', changed: [] });
+        }
+      },
+      onDisabled: () => {
+        watcher = null;
+      },
+    });
+  }
+
   if (openBrowser) {
     await open(url);
   }
@@ -418,6 +378,95 @@ export async function startServer(options: ServerOptions): Promise<ServerInstanc
     },
     rescan: () => doScan(),
   };
+}
+
+function startProjectWatcher(options: {
+  projectRoot: string;
+  onChange: (changed: string[]) => void | Promise<void>;
+  onDisabled: () => void;
+}): FSWatcher {
+  const { projectRoot, onChange, onDisabled } = options;
+  const ignore = loadIgnoreMatcher(projectRoot);
+
+  const watcher = chokidar.watch(projectRoot, {
+    ignored: (watchedPath: string) =>
+      shouldIgnoreWatchPath(watchedPath, projectRoot, ignore),
+    persistent: true,
+    ignoreInitial: true,
+    // Avoid opening an extra FD per path via existsSync/stat in ignored.
+    awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 },
+    ignorePermissionErrors: true,
+  });
+
+  let disabled = false;
+  const disableWatcher = (reason: string) => {
+    if (disabled) return;
+    disabled = true;
+    console.error(`[tech-debt] ${reason}`);
+    void watcher.close().finally(() => onDisabled());
+  };
+
+  watcher.on('error', (err: unknown) => {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/EMFILE|ENFILE|too many open files/i.test(message)) {
+      disableWatcher(
+        'Live reload disabled (too many open files). Use Rescan in the UI or run with --no-watch.',
+      );
+      return;
+    }
+    console.error('[tech-debt] watcher error:', message);
+  });
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  const pendingChanges = new Set<string>();
+
+  const handleChange = (filePath: string) => {
+    if (disabled) return;
+    pendingChanges.add(filePath);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const changed = [...pendingChanges];
+      pendingChanges.clear();
+      void onChange(changed);
+    }, 500);
+  };
+
+  watcher.on('change', handleChange);
+  watcher.on('add', handleChange);
+  watcher.on('unlink', handleChange);
+
+  return watcher;
+}
+
+/** Fast ignore path — no fs.stat (stat during watch setup blows the FD limit). */
+function shouldIgnoreWatchPath(
+  watchedPath: string,
+  projectRoot: string,
+  ignore: ReturnType<typeof loadIgnoreMatcher>,
+): boolean {
+  if (watchedPath === projectRoot) return false;
+
+  const base = path.basename(watchedPath);
+  if (base.startsWith('.')) return true;
+  if (IGNORE_DIRS.has(base)) return true;
+
+  // Any path segment that matches a known heavy directory.
+  for (const part of watchedPath.split(/[/\\]/)) {
+    if (IGNORE_DIRS.has(part)) return true;
+  }
+
+  const relative = path.relative(projectRoot, watchedPath).replace(/\\/g, '/');
+  if (!relative || relative === '.' || relative.startsWith('..')) return true;
+
+  const ext = path.extname(base).toLowerCase();
+  // Files with a non-source extension never need watching.
+  if (ext && !SOURCE_EXTENSIONS.has(ext)) return true;
+
+  if (ignore.ignoresDirectory(relative) || ignore.ignores(relative)) {
+    return true;
+  }
+
+  return false;
 }
 
 function pathExists(p: string): boolean {

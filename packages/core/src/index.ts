@@ -20,6 +20,8 @@ export {
   discoverProject,
   collectSourceFiles,
   getGitUser,
+  SOURCE_EXTENSIONS,
+  IGNORE_DIRS,
 } from './discovery.js';
 export {
   loadIgnoreMatcher,

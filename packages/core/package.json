@@ -1,6 +1,6 @@
 {
   "name": "@tech-debt/core",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Comment scanner and technical debt aggregation engine",
   "type": "module",
   "main": "./dist/index.js",
