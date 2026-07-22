@@ -1,5 +1,5 @@
-import { useExplorerStore } from '../store/explorer';
-import type { AgeBucket, DebtKind } from '@tech-debt/core';
+import { useExplorerStore } from '../store/explorer'
+import type { AgeBucket, DebtKind } from '@tech-debt/core'
 import {
   ageColor,
   ageLabel,
@@ -8,9 +8,9 @@ import {
   formatAge,
   kindColor,
   kindLabel,
-} from '../utils/format';
+} from '../utils/format'
 
-const KINDS: Array<DebtKind | 'all'> = ['all', ...DEBT_KINDS];
+const KINDS: Array<DebtKind | 'all'> = ['all', ...DEBT_KINDS]
 const AGES: Array<AgeBucket | 'all'> = [
   'all',
   'fresh',
@@ -19,30 +19,30 @@ const AGES: Array<AgeBucket | 'all'> = [
   'stale',
   'ancient',
   'unknown',
-];
+]
 
 export function ItemsView() {
-  const report = useExplorerStore((s) => s.report);
-  const filterKind = useExplorerStore((s) => s.filterKind);
-  const filterAge = useExplorerStore((s) => s.filterAge);
-  const filterMine = useExplorerStore((s) => s.filterMine);
-  const filterAuthor = useExplorerStore((s) => s.filterAuthor);
-  const showTriaged = useExplorerStore((s) => s.showTriaged);
-  const gitUser = useExplorerStore((s) => s.gitUser);
-  const searchQuery = useExplorerStore((s) => s.searchQuery);
-  const selectedItemId = useExplorerStore((s) => s.selectedItemId);
-  const setFilterKind = useExplorerStore((s) => s.setFilterKind);
-  const setFilterAge = useExplorerStore((s) => s.setFilterAge);
-  const setFilterMine = useExplorerStore((s) => s.setFilterMine);
-  const setFilterAuthor = useExplorerStore((s) => s.setFilterAuthor);
-  const setShowTriaged = useExplorerStore((s) => s.setShowTriaged);
-  const setSearchQuery = useExplorerStore((s) => s.setSearchQuery);
-  const selectItem = useExplorerStore((s) => s.selectItem);
+  const report = useExplorerStore((s) => s.report)
+  const filterKind = useExplorerStore((s) => s.filterKind)
+  const filterAge = useExplorerStore((s) => s.filterAge)
+  const filterMine = useExplorerStore((s) => s.filterMine)
+  const filterAuthor = useExplorerStore((s) => s.filterAuthor)
+  const showTriaged = useExplorerStore((s) => s.showTriaged)
+  const gitUser = useExplorerStore((s) => s.gitUser)
+  const searchQuery = useExplorerStore((s) => s.searchQuery)
+  const selectedItemId = useExplorerStore((s) => s.selectedItemId)
+  const setFilterKind = useExplorerStore((s) => s.setFilterKind)
+  const setFilterAge = useExplorerStore((s) => s.setFilterAge)
+  const setFilterMine = useExplorerStore((s) => s.setFilterMine)
+  const setFilterAuthor = useExplorerStore((s) => s.setFilterAuthor)
+  const setShowTriaged = useExplorerStore((s) => s.setShowTriaged)
+  const setSearchQuery = useExplorerStore((s) => s.setSearchQuery)
+  const selectItem = useExplorerStore((s) => s.selectItem)
 
-  if (!report) return null;
+  if (!report) return null
 
-  const canFilterMine = Boolean(gitUser?.email || gitUser?.name);
-  const hidden = report.stats.triagedHidden ?? 0;
+  const canFilterMine = Boolean(gitUser?.email || gitUser?.name)
+  const hidden = report.stats.triagedHidden ?? 0
   const items = filterItems(report.items, {
     kind: filterKind,
     age: filterAge,
@@ -50,7 +50,7 @@ export function ItemsView() {
     mine: filterMine,
     gitUser,
     author: filterAuthor,
-  });
+  })
 
   return (
     <div className="fade-up" style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -77,9 +77,7 @@ export function ItemsView() {
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
             {items.length} of {report.items.length} items
-            {hidden > 0 && !showTriaged
-              ? ` · ${hidden} triaged hidden`
-              : ''}
+            {hidden > 0 && !showTriaged ? ` · ${hidden} triaged hidden` : ''}
           </p>
         </div>
         <div className="input-shell" style={{ height: 38, minWidth: 210 }}>
@@ -178,7 +176,7 @@ export function ItemsView() {
           </div>
         ) : (
           items.map((item) => {
-            const selected = selectedItemId === item.id;
+            const selected = selectedItemId === item.id
             return (
               <button
                 key={item.id}
@@ -259,12 +257,12 @@ export function ItemsView() {
                   {formatAge(item.blame?.ageDays)}
                 </span>
               </button>
-            );
+            )
           })
         )}
       </div>
     </div>
-  );
+  )
 }
 
 function FilterChip({
@@ -272,9 +270,9 @@ function FilterChip({
   active,
   onClick,
 }: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
+  label: string
+  active: boolean
+  onClick: () => void
 }) {
   return (
     <button
@@ -284,5 +282,5 @@ function FilterChip({
     >
       {label}
     </button>
-  );
+  )
 }

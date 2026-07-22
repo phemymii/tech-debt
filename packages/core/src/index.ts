@@ -13,8 +13,8 @@ export type {
   DebtReport,
   ScanOptions,
   ScanProgress,
-} from './types.js';
-export { DEBT_KINDS } from './types.js';
+} from './types.js'
+export { DEBT_KINDS } from './types.js'
 
 export {
   discoverProject,
@@ -22,20 +22,21 @@ export {
   getGitUser,
   SOURCE_EXTENSIONS,
   IGNORE_DIRS,
-} from './discovery.js';
+} from './discovery.js'
 export {
   loadIgnoreMatcher,
   createIgnoreMatcher,
   parseIgnoreFile,
+  isSensitivePath,
   DEFAULT_IGNORE_PATTERNS,
   type IgnoreMatcher,
-} from './ignore.js';
-export { parseComments } from './comment-parser.js';
+} from './ignore.js'
+export { parseComments } from './comment-parser.js'
 export {
   extractTickets,
   resolveGithubIssuesBase,
   githubIssuesBaseFromRemote,
-} from './tickets.js';
+} from './tickets.js'
 export {
   triageKey,
   triageStatePath,
@@ -52,8 +53,8 @@ export {
   type TriageStatus,
   type TriageEntry,
   type TriageState,
-} from './triage.js';
-export { blameFileLines } from './blame.js';
+} from './triage.js'
+export { blameFileLines } from './blame.js'
 export {
   ageBucketFromDays,
   buildAuthors,
@@ -62,11 +63,11 @@ export {
   buildStats,
   emptyKindCounts,
   emptyAgeCounts,
-} from './aggregate.js';
+} from './aggregate.js'
 export {
   scanProject,
   getItemDetail,
   getFileDebt,
   getAuthorDebt,
   type ProgressCallback,
-} from './scanner.js';
+} from './scanner.js'

@@ -1,13 +1,21 @@
 :root,
-[data-theme="light"] {
+[data-theme='light'] {
   --bg-primary: #e6e8e4;
   --bg-secondary: #f3f4f0;
   --bg-tertiary: #d8dcd4;
   --bg-elevated: #fafaf7;
   --bg-glass: rgba(243, 244, 240, 0.88);
   --bg-pattern:
-    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(31, 107, 92, 0.1), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(176, 82, 40, 0.07), transparent 50%),
+    radial-gradient(
+      ellipse 80% 50% at 0% -10%,
+      rgba(31, 107, 92, 0.1),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 100% 0%,
+      rgba(176, 82, 40, 0.07),
+      transparent 50%
+    ),
     linear-gradient(165deg, #e9ebe6 0%, #dde2dc 48%, #e4e6e1 100%);
   --hairline: rgba(18, 22, 20, 0.07);
   --text-primary: #121614;
@@ -42,15 +50,23 @@
   --row-selected: rgba(31, 107, 92, 0.1);
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --bg-primary: #0e1210;
   --bg-secondary: #161b18;
   --bg-tertiary: #222a25;
   --bg-elevated: #1a211d;
   --bg-glass: rgba(14, 18, 16, 0.9);
   --bg-pattern:
-    radial-gradient(ellipse 70% 45% at 5% -5%, rgba(58, 168, 142, 0.14), transparent 50%),
-    radial-gradient(ellipse 50% 35% at 95% 0%, rgba(196, 108, 62, 0.08), transparent 45%),
+    radial-gradient(
+      ellipse 70% 45% at 5% -5%,
+      rgba(58, 168, 142, 0.14),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 35% at 95% 0%,
+      rgba(196, 108, 62, 0.08),
+      transparent 45%
+    ),
     linear-gradient(170deg, #0e1210 0%, #121816 55%, #101412 100%);
   --hairline: rgba(230, 236, 232, 0.08);
   --text-primary: #e8eeea;
@@ -100,7 +116,9 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
-  transition: background-color 0.25s, color 0.25s;
+  transition:
+    background-color 0.25s,
+    color 0.25s;
 }
 
 button,
@@ -187,7 +205,10 @@ input:focus-visible {
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, transform 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.15s;
 }
 
 .chip:hover {
@@ -222,18 +243,25 @@ input:focus-visible {
 .input-shell {
   background: var(--bg-elevated);
   border-radius: var(--radius-sm);
-  box-shadow: inset 0 0 0 1px var(--hairline), var(--shadow-soft);
-  transition: box-shadow 0.15s, background 0.15s;
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    var(--shadow-soft);
+  transition:
+    box-shadow 0.15s,
+    background 0.15s;
 }
 
 .input-shell:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-muted) 35%, transparent),
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--text-muted) 35%, transparent),
     var(--shadow-soft);
 }
 
 .input-shell:focus-within {
   background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1.5px var(--accent), 0 0 0 3px var(--accent-soft);
+  box-shadow:
+    inset 0 0 0 1.5px var(--accent),
+    0 0 0 3px var(--accent-soft);
 }
 
 .input-shell input::placeholder {

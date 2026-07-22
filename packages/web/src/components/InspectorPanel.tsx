@@ -1,27 +1,27 @@
-import { ExternalLink, X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { triageItem } from '../hooks/useDebtData';
-import { useExplorerStore } from '../store/explorer';
+import { ExternalLink, X } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { triageItem } from '../hooks/useDebtData'
+import { useExplorerStore } from '../store/explorer'
 import {
   ageColor,
   ageLabel,
   formatAge,
   kindColor,
   kindLabel,
-} from '../utils/format';
-import { openFileInEditor } from '../utils/openEditor';
+} from '../utils/format'
+import { openFileInEditor } from '../utils/openEditor'
 
 export function InspectorPanel() {
-  const report = useExplorerStore((s) => s.report);
-  const selectedItemId = useExplorerStore((s) => s.selectedItemId);
-  const showTriaged = useExplorerStore((s) => s.showTriaged);
-  const selectItem = useExplorerStore((s) => s.selectItem);
-  const setReport = useExplorerStore((s) => s.setReport);
+  const report = useExplorerStore((s) => s.report)
+  const selectedItemId = useExplorerStore((s) => s.selectedItemId)
+  const showTriaged = useExplorerStore((s) => s.showTriaged)
+  const selectItem = useExplorerStore((s) => s.selectItem)
+  const setReport = useExplorerStore((s) => s.setReport)
 
-  if (!selectedItemId || !report) return null;
+  if (!selectedItemId || !report) return null
 
-  const item = report.items.find((i) => i.id === selectedItemId);
-  if (!item) return null;
+  const item = report.items.find((i) => i.id === selectedItemId)
+  if (!item) return null
 
   return (
     <aside
@@ -186,8 +186,8 @@ export function InspectorPanel() {
                   itemId: item.id,
                   action: 'restore',
                   includeTriaged: showTriaged,
-                });
-                if (next) setReport(next);
+                })
+                if (next) setReport(next)
               }}
             />
           ) : (
@@ -199,10 +199,10 @@ export function InspectorPanel() {
                     itemId: item.id,
                     action: 'dismiss',
                     includeTriaged: showTriaged,
-                  });
+                  })
                   if (next) {
-                    setReport(next);
-                    if (!showTriaged) selectItem(null);
+                    setReport(next)
+                    if (!showTriaged) selectItem(null)
                   }
                 }}
               />
@@ -216,10 +216,10 @@ export function InspectorPanel() {
                       action: 'snooze',
                       days,
                       includeTriaged: showTriaged,
-                    });
+                    })
                     if (next) {
-                      setReport(next);
-                      if (!showTriaged) selectItem(null);
+                      setReport(next)
+                      if (!showTriaged) selectItem(null)
                     }
                   }}
                 />
@@ -326,15 +326,15 @@ export function InspectorPanel() {
         </div>
       </div>
     </aside>
-  );
+  )
 }
 
 function TriageButton({
   label,
   onClick,
 }: {
-  label: string;
-  onClick: () => void | Promise<void>;
+  label: string
+  onClick: () => void | Promise<void>
 }) {
   return (
     <button
@@ -354,7 +354,7 @@ function TriageButton({
     >
       {label}
     </button>
-  );
+  )
 }
 
 function Field({
@@ -362,9 +362,9 @@ function Field({
   children,
   mono,
 }: {
-  label: string;
-  children: ReactNode;
-  mono?: boolean;
+  label: string
+  children: ReactNode
+  mono?: boolean
 }) {
   return (
     <div style={{ marginBottom: 14 }}>
@@ -392,5 +392,5 @@ function Field({
         {children}
       </div>
     </div>
-  );
+  )
 }

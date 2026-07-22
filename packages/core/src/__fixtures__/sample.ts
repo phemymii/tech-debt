@@ -9,8 +9,8 @@ export function legacyHelper() {
   // HACK: temporary cache bypass
   // XXX: remove after migration
   // BUG: null when list is empty
-  return 42;
+  return 42
 }
 
 /* TODO: migrate callers off this module */
-export const FLAG = true;
+export const FLAG = true

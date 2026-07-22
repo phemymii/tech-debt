@@ -1,6 +1,6 @@
 {
   "name": "@tech-debt/server",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Fastify server for tech-debt explorer",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,18 +22,18 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@fastify/cors": "^10.0.1",
+    "@fastify/cors": "^11.3.0",
     "@fastify/static": "^10.1.2",
-    "@fastify/websocket": "^11.0.1",
-    "@tech-debt/core": "0.1.4",
-    "chokidar": "^4.0.3",
-    "fastify": "^5.2.0",
-    "open": "^10.1.0"
+    "@fastify/websocket": "^11.3.0",
+    "@tech-debt/core": "0.1.5",
+    "chokidar": "^5.0.0",
+    "fastify": "^5.10.0",
+    "open": "^11.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/ws": "^8.5.13",
-    "typescript": "^5.7.2"
+    "@types/node": "^26.1.1",
+    "@types/ws": "^8.18.1",
+    "typescript": "^7.0.2"
   },
   "license": "MIT",
   "repository": {

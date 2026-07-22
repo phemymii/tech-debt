@@ -1,5 +1,5 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 import {
   applyTriageToReport,
   dismissItem,
@@ -8,10 +8,12 @@ import {
   pruneExpired,
   snoozeItem,
   triageKey,
-} from '../triage.js';
-import type { DebtItem, DebtReport } from '../types.js';
+} from '../triage.js'
+import type { DebtItem, DebtReport } from '../types.js'
 
-function item(partial: Partial<DebtItem> & Pick<DebtItem, 'id' | 'message'>): DebtItem {
+function item(
+  partial: Partial<DebtItem> & Pick<DebtItem, 'id' | 'message'>,
+): DebtItem {
   return {
     kind: 'todo',
     raw: '// TODO',
@@ -21,20 +23,30 @@ function item(partial: Partial<DebtItem> & Pick<DebtItem, 'id' | 'message'>): De
     column: 1,
     ageBucket: 'unknown',
     ...partial,
-  };
+  }
 }
 
 describe('triage', () => {
   it('uses stable keys', () => {
-    const a = item({ id: '1', message: 'hello', relativePath: 'a.ts', line: 3 });
-    const b = item({ id: '2', message: 'Hello', relativePath: 'a.ts', line: 3 });
-    assert.equal(triageKey(a), triageKey(b));
-  });
+    const a = item({
+      id: '1',
+      message: 'hello',
+      relativePath: 'a.ts',
+      line: 3,
+    })
+    const b = item({
+      id: '2',
+      message: 'Hello',
+      relativePath: 'a.ts',
+      line: 3,
+    })
+    assert.equal(triageKey(a), triageKey(b))
+  })
 
   it('hides dismissed items from the open report', () => {
-    const open = item({ id: '1', message: 'keep' });
-    const gone = item({ id: '2', message: 'hide', line: 2 });
-    const state = dismissItem(emptyTriageState(), gone);
+    const open = item({ id: '1', message: 'keep' })
+    const gone = item({ id: '2', message: 'hide', line: 2 })
+    const state = dismissItem(emptyTriageState(), gone)
     const report = applyTriageToReport(
       {
         config: { root: '/p', name: 'p', isGitRepo: false },
@@ -72,16 +84,16 @@ describe('triage', () => {
         scannedAt: new Date().toISOString(),
       } satisfies DebtReport,
       state,
-    );
-    assert.equal(report.items.length, 1);
-    assert.equal(report.items[0].id, '1');
-    assert.equal(report.stats.triagedHidden, 1);
-  });
+    )
+    assert.equal(report.items.length, 1)
+    assert.equal(report.items[0].id, '1')
+    assert.equal(report.stats.triagedHidden, 1)
+  })
 
   it('expires snoozes', () => {
-    const target = item({ id: '1', message: 'later' });
-    let state = snoozeItem(emptyTriageState(), target, 7);
-    const key = triageKey(target);
+    const target = item({ id: '1', message: 'later' })
+    let state = snoozeItem(emptyTriageState(), target, 7)
+    const key = triageKey(target)
     state = {
       version: 1,
       entries: {
@@ -90,9 +102,9 @@ describe('triage', () => {
           until: new Date(Date.now() - 1000).toISOString(),
         },
       },
-    };
-    const pruned = pruneExpired(state);
-    assert.equal(Object.keys(pruned.entries).length, 0);
-    assert.equal(isTriageActive(state.entries[key], new Date()), false);
-  });
-});
+    }
+    const pruned = pruneExpired(state)
+    assert.equal(Object.keys(pruned.entries).length, 0)
+    assert.equal(isTriageActive(state.entries[key], new Date()), false)
+  })
+})

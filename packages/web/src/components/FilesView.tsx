@@ -1,15 +1,15 @@
-import { useExplorerStore } from '../store/explorer';
-import { DEBT_KINDS, formatAge, kindLabel } from '../utils/format';
+import { useExplorerStore } from '../store/explorer'
+import { DEBT_KINDS, formatAge, kindLabel } from '../utils/format'
 
 export function FilesView() {
-  const report = useExplorerStore((s) => s.report);
-  const setViewMode = useExplorerStore((s) => s.setViewMode);
-  const setSearchQuery = useExplorerStore((s) => s.setSearchQuery);
-  const selectItem = useExplorerStore((s) => s.selectItem);
+  const report = useExplorerStore((s) => s.report)
+  const setViewMode = useExplorerStore((s) => s.setViewMode)
+  const setSearchQuery = useExplorerStore((s) => s.setSearchQuery)
+  const selectItem = useExplorerStore((s) => s.selectItem)
 
-  if (!report) return null;
+  if (!report) return null
 
-  const max = Math.max(...report.files.map((f) => f.total), 1);
+  const max = Math.max(...report.files.map((f) => f.total), 1)
 
   return (
     <div className="fade-up" style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -47,10 +47,10 @@ export function FilesView() {
               key={file.path}
               type="button"
               onClick={() => {
-                setSearchQuery(file.relativePath);
-                setViewMode('items');
-                const first = file.items[0];
-                if (first) selectItem(first);
+                setSearchQuery(file.relativePath)
+                setViewMode('items')
+                const first = file.items[0]
+                if (first) selectItem(first)
               }}
               className="surface"
               style={{
@@ -130,5 +130,5 @@ export function FilesView() {
         </div>
       )}
     </div>
-  );
+  )
 }

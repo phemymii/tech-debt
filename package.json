@@ -1,6 +1,6 @@
 {
   "name": "tech-debt-workspace",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "Interactive technical debt explorer for local codebases",
   "license": "MIT",
@@ -20,6 +20,8 @@
     "dev": "npm run dev -w @tech-debt/web",
     "tech-debt": "node packages/cli/dist/index.js",
     "start": "npm run build && node packages/cli/dist/index.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "publish:packages": "npm run build && npm publish -w @tech-debt/core --access public && npm publish -w @tech-debt/server --access public && npm publish -w @hollyman/tech-debt --access public",
     "publish:cli": "npm run build -w @hollyman/tech-debt && npm publish -w @hollyman/tech-debt --access public"
   },
@@ -29,5 +31,8 @@
   "allowScripts": {
     "esbuild@0.25.12": true,
     "fsevents@2.3.3": true
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
   }
 }

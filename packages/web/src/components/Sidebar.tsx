@@ -4,23 +4,27 @@ import {
   Users,
   FolderTree,
   RefreshCw,
-} from 'lucide-react';
-import { useExplorerStore, type ViewMode } from '../store/explorer';
-import { rescan } from '../hooks/useDebtData';
-import { DEBT_KINDS, kindLabel } from '../utils/format';
+} from 'lucide-react'
+import { useExplorerStore, type ViewMode } from '../store/explorer'
+import { rescan } from '../hooks/useDebtData'
+import { DEBT_KINDS, kindLabel } from '../utils/format'
 
-const NAV: Array<{ id: ViewMode; label: string; icon: typeof LayoutDashboard }> = [
+const NAV: Array<{
+  id: ViewMode
+  label: string
+  icon: typeof LayoutDashboard
+}> = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'items', label: 'All debt', icon: ListTodo },
   { id: 'authors', label: 'By author', icon: Users },
   { id: 'files', label: 'Hotspots', icon: FolderTree },
-];
+]
 
 export function Sidebar() {
-  const viewMode = useExplorerStore((s) => s.viewMode);
-  const setViewMode = useExplorerStore((s) => s.setViewMode);
-  const report = useExplorerStore((s) => s.report);
-  const setScanning = useExplorerStore((s) => s.setScanning);
+  const viewMode = useExplorerStore((s) => s.viewMode)
+  const setViewMode = useExplorerStore((s) => s.setViewMode)
+  const report = useExplorerStore((s) => s.report)
+  const setScanning = useExplorerStore((s) => s.setScanning)
 
   return (
     <aside
@@ -36,7 +40,7 @@ export function Sidebar() {
     >
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {NAV.map(({ id, label, icon: Icon }) => {
-          const active = viewMode === id;
+          const active = viewMode === id
           return (
             <button
               key={id}
@@ -62,7 +66,7 @@ export function Sidebar() {
               <Icon size={16} strokeWidth={active ? 2.25 : 1.75} />
               {label}
             </button>
-          );
+          )
         })}
       </nav>
 
@@ -100,8 +104,8 @@ export function Sidebar() {
           <button
             type="button"
             onClick={async () => {
-              setScanning(true);
-              await rescan();
+              setScanning(true)
+              await rescan()
             }}
             style={{
               marginTop: 12,
@@ -127,7 +131,7 @@ export function Sidebar() {
         </div>
       )}
     </aside>
-  );
+  )
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
@@ -152,5 +156,5 @@ function StatRow({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
-  );
+  )
 }

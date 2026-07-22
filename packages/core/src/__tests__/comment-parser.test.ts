@@ -1,6 +1,6 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
-import { parseComments } from '../comment-parser.js';
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import { parseComments } from '../comment-parser.js'
 
 describe('parseComments', () => {
   it('finds classic markers', () => {
@@ -14,8 +14,8 @@ describe('parseComments', () => {
 /** @deprecated old */
 `,
       'sample.ts',
-    );
-    const kinds = matches.map((m) => m.kind);
+    )
+    const kinds = matches.map((m) => m.kind)
     assert.deepEqual(kinds, [
       'todo',
       'fixme',
@@ -23,8 +23,8 @@ describe('parseComments', () => {
       'xxx',
       'bug',
       'deprecated',
-    ]);
-  });
+    ])
+  })
 
   it('finds markdown list and html markers', () => {
     const matches = parseComments(
@@ -33,9 +33,9 @@ describe('parseComments', () => {
 <!-- HACK: temporary -->
 `,
       'notes.md',
-    );
-    assert.equal(matches.length, 2);
-    assert.equal(matches[0].kind, 'todo');
-    assert.equal(matches[1].kind, 'hack');
-  });
-});
+    )
+    assert.equal(matches.length, 2)
+    assert.equal(matches[0].kind, 'todo')
+    assert.equal(matches[1].kind, 'hack')
+  })
+})

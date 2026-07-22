@@ -76,10 +76,12 @@ GitHub `#123` links resolve from `origin` when it is a GitHub remote.
 
 Scanning respects, in order (last match wins):
 
-1. Built-in defaults (coverage, e2e runners, minified assets)
+1. Built-in defaults (coverage, e2e, minified assets, **`.env` / secrets / keys**)
 2. `.gitignore`
 3. `.git/info/exclude`
 4. `.tech-debtignore` (project overrides)
+
+Dotfiles (including `.env*`) are never walked. Built-ins also skip common secret filenames (`secrets.yml`, `credentials.json`, `*.pem`, `id_rsa`, etc.), and **Open in editor** refuses those paths.
 
 Copy `.tech-debtignore.example` to `.tech-debtignore` for project-specific paths:
 

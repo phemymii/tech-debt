@@ -1,13 +1,13 @@
-import { spawn, execFile } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
-import { promisify } from 'node:util';
+import { spawn, execFile } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
 
-const execFileAsync = promisify(execFile);
+const execFileAsync = promisify(execFile)
 
 export interface OpenInEditorOptions {
-  line?: number;
-  column?: number;
+  line?: number
+  column?: number
 }
 
 /**
@@ -20,33 +20,38 @@ export async function openInEditor(
   filePath: string,
   projectRoot: string,
   options: OpenInEditorOptions = {},
-): Promise<{ ok: boolean; editor?: string; error?: string; resolved?: string }> {
-  let resolved: string;
-  let root: string;
+): Promise<{
+  ok: boolean
+  editor?: string
+  error?: string
+  resolved?: string
+}> {
+  let resolved: string
+  let root: string
   try {
-    resolved = fs.realpathSync(path.resolve(filePath));
-    root = fs.realpathSync(path.resolve(projectRoot));
+    resolved = fs.realpathSync(path.resolve(filePath))
+    root = fs.realpathSync(path.resolve(projectRoot))
   } catch {
-    resolved = path.resolve(filePath);
-    root = path.resolve(projectRoot);
+    resolved = path.resolve(filePath)
+    root = path.resolve(projectRoot)
   }
 
-  const rootPrefix = root.endsWith(path.sep) ? root : root + path.sep;
+  const rootPrefix = root.endsWith(path.sep) ? root : root + path.sep
   if (resolved !== root && !resolved.startsWith(rootPrefix)) {
-    return { ok: false, error: 'Path is outside the project root', resolved };
+    return { ok: false, error: 'Path is outside the project root', resolved }
   }
 
   if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
-    return { ok: false, error: `File not found: ${filePath}`, resolved };
+    return { ok: false, error: `File not found: ${filePath}`, resolved }
   }
 
-  const target = formatGotoTarget(resolved, options.line, options.column);
-  const candidates = buildEditorCandidates();
+  const target = formatGotoTarget(resolved, options.line, options.column)
+  const candidates = buildEditorCandidates()
 
   for (const { command, args, supportsGoto } of candidates) {
-    const fileArg = supportsGoto ? target : resolved;
-    const ok = await tryLaunch(command, [...args, fileArg]);
-    if (ok) return { ok: true, editor: command, resolved };
+    const fileArg = supportsGoto ? target : resolved
+    const ok = await tryLaunch(command, [...args, fileArg])
+    if (ok) return { ok: true, editor: command, resolved }
   }
 
   return {
@@ -54,7 +59,7 @@ export async function openInEditor(
     error:
       'No editor found. Install the Cursor/VS Code CLI, or set TECH_DEBT_EDITOR.',
     resolved,
-  };
+  }
 }
 
 function formatGotoTarget(
@@ -62,34 +67,34 @@ function formatGotoTarget(
   line?: number,
   column?: number,
 ): string {
-  if (line == null || !Number.isFinite(line) || line < 1) return filePath;
+  if (line == null || !Number.isFinite(line) || line < 1) return filePath
   const col =
     column != null && Number.isFinite(column) && column >= 1
       ? Math.floor(column)
-      : undefined;
+      : undefined
   return col != null
     ? `${filePath}:${Math.floor(line)}:${col}`
-    : `${filePath}:${Math.floor(line)}`;
+    : `${filePath}:${Math.floor(line)}`
 }
 
 interface EditorCandidate {
-  command: string;
-  args: string[];
+  command: string
+  args: string[]
   /** Whether the CLI accepts file:line:column as the path argument */
-  supportsGoto: boolean;
+  supportsGoto: boolean
 }
 
 function buildEditorCandidates(): EditorCandidate[] {
-  const list: EditorCandidate[] = [];
+  const list: EditorCandidate[] = []
 
-  const explicit = process.env.TECH_DEBT_EDITOR?.trim();
+  const explicit = process.env.TECH_DEBT_EDITOR?.trim()
   if (explicit) {
-    const parts = explicit.split(/\s+/);
+    const parts = explicit.split(/\s+/)
     list.push({
       command: parts[0],
       args: parts.slice(1),
       supportsGoto: true,
-    });
+    })
   }
 
   // GUI editors first — $EDITOR is often vim/nano in shells and would "succeed" wrongly
@@ -97,19 +102,19 @@ function buildEditorCandidates(): EditorCandidate[] {
     { command: 'cursor', args: ['-g'], supportsGoto: true },
     { command: 'code', args: ['-g'], supportsGoto: true },
     { command: 'subl', args: [], supportsGoto: true },
-  );
+  )
 
   const fromEnv = [process.env.VISUAL, process.env.EDITOR]
     .filter((v): v is string => !!v?.trim())
-    .filter((v) => !isTerminalEditor(v));
+    .filter((v) => !isTerminalEditor(v))
 
   for (const v of fromEnv) {
-    const parts = v.trim().split(/\s+/);
+    const parts = v.trim().split(/\s+/)
     list.push({
       command: parts[0],
       args: parts.slice(1),
       supportsGoto: true,
-    });
+    })
   }
 
   if (process.platform === 'darwin') {
@@ -121,11 +126,11 @@ function buildEditorCandidates(): EditorCandidate[] {
         supportsGoto: false,
       },
       { command: 'open', args: [], supportsGoto: false },
-    );
+    )
   }
 
   if (process.platform === 'linux') {
-    list.push({ command: 'xdg-open', args: [], supportsGoto: false });
+    list.push({ command: 'xdg-open', args: [], supportsGoto: false })
   }
 
   if (process.platform === 'win32') {
@@ -134,34 +139,34 @@ function buildEditorCandidates(): EditorCandidate[] {
       command: 'cmd',
       args: ['/c', 'start', '""'],
       supportsGoto: false,
-    });
+    })
   }
 
-  return list;
+  return list
 }
 
 function isTerminalEditor(cmd: string): boolean {
-  const base = path.basename(cmd.trim().split(/\s+/)[0] ?? '').toLowerCase();
+  const base = path.basename(cmd.trim().split(/\s+/)[0] ?? '').toLowerCase()
   return ['vim', 'nvim', 'vi', 'nano', 'emacs', 'ed', 'pico', 'micro'].includes(
     base,
-  );
+  )
 }
 
 async function commandExists(command: string): Promise<boolean> {
   if (command.includes(path.sep) || command.includes('/')) {
-    return fs.existsSync(command);
+    return fs.existsSync(command)
   }
   try {
-    const which = process.platform === 'win32' ? 'where' : 'which';
-    await execFileAsync(which, [command]);
-    return true;
+    const which = process.platform === 'win32' ? 'where' : 'which'
+    await execFileAsync(which, [command])
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
 async function tryLaunch(command: string, args: string[]): Promise<boolean> {
-  if (!(await commandExists(command))) return false;
+  if (!(await commandExists(command))) return false
 
   return new Promise((resolve) => {
     // Never use shell: true with a separate args array (Node DEP0190).
@@ -170,22 +175,22 @@ async function tryLaunch(command: string, args: string[]): Promise<boolean> {
       stdio: 'ignore',
       env: process.env,
       windowsHide: true,
-    });
+    })
 
-    let settled = false;
+    let settled = false
     const done = (ok: boolean) => {
-      if (settled) return;
-      settled = true;
-      resolve(ok);
-    };
+      if (settled) return
+      settled = true
+      resolve(ok)
+    }
 
-    child.on('error', () => done(false));
+    child.on('error', () => done(false))
     // Non-zero exit soon after launch usually means the CLI rejected the args
     child.on('exit', (code) => {
-      if (code !== null && code !== 0) done(false);
-    });
+      if (code !== null && code !== 0) done(false)
+    })
 
-    child.unref();
-    setTimeout(() => done(true), 120);
-  });
+    child.unref()
+    setTimeout(() => done(true), 120)
+  })
 }

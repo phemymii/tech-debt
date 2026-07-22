@@ -1,12 +1,12 @@
-import { useExplorerStore } from '../store/explorer';
-import { OverviewView } from './OverviewView';
-import { ItemsView } from './ItemsView';
-import { AuthorsView } from './AuthorsView';
-import { FilesView } from './FilesView';
+import { useExplorerStore } from '../store/explorer'
+import { OverviewView } from './OverviewView'
+import { ItemsView } from './ItemsView'
+import { AuthorsView } from './AuthorsView'
+import { FilesView } from './FilesView'
 
 export function MainView() {
-  const loading = useExplorerStore((s) => s.loading);
-  const viewMode = useExplorerStore((s) => s.viewMode);
+  const loading = useExplorerStore((s) => s.loading)
+  const viewMode = useExplorerStore((s) => s.viewMode)
 
   if (loading) {
     return (
@@ -20,7 +20,7 @@ export function MainView() {
       >
         Scanning for technical debt…
       </main>
-    );
+    )
   }
 
   return (
@@ -36,5 +36,5 @@ export function MainView() {
       {viewMode === 'authors' && <AuthorsView />}
       {viewMode === 'files' && <FilesView />}
     </main>
-  );
+  )
 }

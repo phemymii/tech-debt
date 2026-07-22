@@ -1,9 +1,9 @@
-import { Moon, Sun } from 'lucide-react';
-import { useExplorerStore } from '../store/explorer';
+import { Moon, Sun } from 'lucide-react'
+import { useExplorerStore } from '../store/explorer'
 
 export function ThemeToggle() {
-  const theme = useExplorerStore((s) => s.theme);
-  const toggleTheme = useExplorerStore((s) => s.toggleTheme);
+  const theme = useExplorerStore((s) => s.theme)
+  const toggleTheme = useExplorerStore((s) => s.toggleTheme)
 
   return (
     <button
@@ -26,5 +26,5 @@ export function ThemeToggle() {
     >
       {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
     </button>
-  );
+  )
 }

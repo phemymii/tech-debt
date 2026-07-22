@@ -11,21 +11,21 @@ export async function openFileInEditor(
         line: options?.line,
         column: options?.column,
       }),
-    });
+    })
     const data = (await res.json()) as {
-      ok: boolean;
-      error?: string;
-      editor?: string;
-    };
-    if (!res.ok || !data.ok) {
-      const message = data.error ?? `Open failed (${res.status})`;
-      window.alert(message);
-      return { ok: false, error: message };
+      ok: boolean
+      error?: string
+      editor?: string
     }
-    return data;
+    if (!res.ok || !data.ok) {
+      const message = data.error ?? `Open failed (${res.status})`
+      window.alert(message)
+      return { ok: false, error: message }
+    }
+    return data
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to open';
-    window.alert(message);
-    return { ok: false, error: message };
+    const message = err instanceof Error ? err.message : 'Failed to open'
+    window.alert(message)
+    return { ok: false, error: message }
   }
 }

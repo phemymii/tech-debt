@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
-import { useDebtData } from './hooks/useDebtData';
-import { useExplorerStore } from './store/explorer';
-import { Sidebar } from './components/Sidebar';
-import { SearchBar } from './components/SearchBar';
-import { MainView } from './components/MainView';
-import { InspectorPanel } from './components/InspectorPanel';
-import { ThemeToggle } from './components/ThemeToggle';
+import { useEffect } from 'react'
+import { useDebtData } from './hooks/useDebtData'
+import { useExplorerStore } from './store/explorer'
+import { Sidebar } from './components/Sidebar'
+import { SearchBar } from './components/SearchBar'
+import { MainView } from './components/MainView'
+import { InspectorPanel } from './components/InspectorPanel'
+import { ThemeToggle } from './components/ThemeToggle'
 
 export function App() {
-  useDebtData();
-  const scanning = useExplorerStore((s) => s.scanning);
-  const theme = useExplorerStore((s) => s.theme);
-  const report = useExplorerStore((s) => s.report);
+  useDebtData()
+  const scanning = useExplorerStore((s) => s.scanning)
+  const theme = useExplorerStore((s) => s.theme)
+  const report = useExplorerStore((s) => s.report)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   return (
     <div
@@ -112,5 +112,5 @@ export function App() {
         <InspectorPanel />
       </div>
     </div>
-  );
+  )
 }
