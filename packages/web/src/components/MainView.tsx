@@ -3,6 +3,7 @@ import { OverviewView } from './OverviewView'
 import { ItemsView } from './ItemsView'
 import { AuthorsView } from './AuthorsView'
 import { FilesView } from './FilesView'
+import { DocsView } from './DocsView'
 
 export function MainView() {
   const loading = useExplorerStore((s) => s.loading)
@@ -35,6 +36,7 @@ export function MainView() {
       {viewMode === 'items' && <ItemsView />}
       {viewMode === 'authors' && <AuthorsView />}
       {viewMode === 'files' && <FilesView />}
+      {viewMode === 'docs' && <DocsView />}
     </main>
   )
 }

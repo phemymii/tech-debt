@@ -19,7 +19,7 @@ program
   .description(
     'Interactive technical debt explorer — map TODO, FIXME, HACK, XXX, BUG, and @deprecated',
   )
-  .version('0.2.1')
+  .version('0.2.2')
   .option('-p, --project <path>', 'Project root directory', process.cwd())
   .option('--port <number>', 'Server port', '4589')
   .option('--no-open', 'Do not open browser automatically')

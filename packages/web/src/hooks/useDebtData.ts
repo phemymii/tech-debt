@@ -103,3 +103,31 @@ export async function triageItem(options: {
   }
   return data.report ?? null
 }
+
+export interface DocEntry {
+  path: string
+  name: string
+}
+
+export interface DocContent {
+  path: string
+  name: string
+  content: string
+}
+
+export async function fetchDocList(): Promise<DocEntry[]> {
+  const res = await fetch('/api/docs')
+  if (!res.ok) throw new Error(`Failed to list docs (${res.status})`)
+  return res.json() as Promise<DocEntry[]>
+}
+
+export async function fetchDocContent(relativePath: string): Promise<DocContent> {
+  const encoded = relativePath
+    .split('/')
+    .map((part) => encodeURIComponent(part))
+    .join('/')
+  const res = await fetch(`/api/docs/${encoded}`)
+  const data = (await res.json()) as DocContent & { error?: string }
+  if (!res.ok) throw new Error(data.error ?? `Failed to load doc (${res.status})`)
+  return data
+}

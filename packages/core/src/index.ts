@@ -19,6 +19,7 @@ export { DEBT_KINDS } from './types.js'
 export {
   discoverProject,
   collectSourceFiles,
+  collectMarkdownFiles,
   getGitUser,
   SOURCE_EXTENSIONS,
   IGNORE_DIRS,

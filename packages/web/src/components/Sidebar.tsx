@@ -3,6 +3,7 @@ import {
   ListTodo,
   Users,
   FolderTree,
+  BookOpen,
   RefreshCw,
 } from 'lucide-react'
 import { useExplorerStore, type ViewMode } from '../store/explorer'
@@ -18,6 +19,7 @@ const NAV: Array<{
   { id: 'items', label: 'All debt', icon: ListTodo },
   { id: 'authors', label: 'By author', icon: Users },
   { id: 'files', label: 'Hotspots', icon: FolderTree },
+  { id: 'docs', label: 'Docs', icon: BookOpen },
 ]
 
 export function Sidebar() {

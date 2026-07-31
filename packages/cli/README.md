@@ -97,6 +97,7 @@ fixtures/**
 - **All debt** — searchable, filterable list, including **My debt** (your `git config` user)
 - **By author** — ownership of open debt
 - **Hotspots** — files with the most markers
+- **Docs** — browse and read project markdown (README first)
 - **Inspector** — full comment context, **Open in editor**, and local triage (dismiss / snooze)
 
 ### Local triage

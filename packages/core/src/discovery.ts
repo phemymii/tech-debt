@@ -101,6 +101,36 @@ export function collectSourceFiles(root: string): string[] {
   return files
 }
 
+/** Markdown docs for the in-app viewer (README.md first). */
+export function collectMarkdownFiles(root: string): string[] {
+  const resolved = path.resolve(root)
+  return collectSourceFiles(resolved)
+    .filter((filePath) => {
+      const ext = path.extname(filePath).toLowerCase()
+      return ext === '.md' || ext === '.mdx'
+    })
+    .sort((a, b) => {
+      const ra = path.relative(resolved, a).replace(/\\/g, '/')
+      const rb = path.relative(resolved, b).replace(/\\/g, '/')
+      return compareMarkdownPaths(ra, rb)
+    })
+}
+
+function compareMarkdownPaths(a: string, b: string): number {
+  const rank = (p: string) => {
+    const base = path.basename(p).toLowerCase()
+    const isReadme = base === 'readme.md' || base === 'readme.mdx'
+    const depth = p.split('/').length
+    if (isReadme && depth === 1) return 0
+    if (isReadme) return 1
+    return 2
+  }
+  const ra = rank(a)
+  const rb = rank(b)
+  if (ra !== rb) return ra - rb
+  return a.localeCompare(b)
+}
+
 function walk(
   root: string,
   dir: string,

@@ -24,6 +24,7 @@ import {
   SOURCE_EXTENSIONS,
   IGNORE_DIRS,
   isSensitivePath,
+  collectMarkdownFiles,
   type DebtReport,
   type DebtItem,
 } from '@tech-debt/core'
@@ -203,6 +204,79 @@ export async function startServer(
     const wildcard = (req.params as Record<string, string>)['*'] ?? ''
     const filePath = decodeURIComponent(wildcard)
     return getFileDebt(report!, filePath) ?? { error: 'File not found' }
+  })
+
+  app.get('/api/docs', async () => {
+    const files = collectMarkdownFiles(projectRoot)
+    return files.map((abs) => {
+      const relativePath = path.relative(projectRoot, abs).replace(/\\/g, '/')
+      return {
+        path: relativePath,
+        name: path.basename(abs),
+      }
+    })
+  })
+
+  app.get('/api/docs/*', async (req, reply) => {
+    const wildcard = (req.params as Record<string, string>)['*'] ?? ''
+    const relativePath = decodeURIComponent(wildcard).replace(/\\/g, '/')
+    if (
+      !relativePath ||
+      relativePath.includes('\0') ||
+      relativePath.startsWith('/') ||
+      relativePath.split('/').includes('..')
+    ) {
+      return reply.status(400).send({ error: 'Invalid path' })
+    }
+
+    const ext = path.extname(relativePath).toLowerCase()
+    if (ext !== '.md' && ext !== '.mdx') {
+      return reply.status(400).send({ error: 'Only markdown files are allowed' })
+    }
+
+    if (
+      isSensitivePath(relativePath) ||
+      isSensitivePath(path.basename(relativePath))
+    ) {
+      return reply.status(403).send({ error: 'Refusing sensitive path' })
+    }
+
+    let absolute = path.resolve(projectRoot, relativePath)
+    let rootResolved = path.resolve(projectRoot)
+    try {
+      absolute = fs.realpathSync(absolute)
+      rootResolved = fs.realpathSync(rootResolved)
+    } catch {
+      return reply.status(404).send({ error: 'File not found' })
+    }
+
+    const rootPrefix = rootResolved.endsWith(path.sep)
+      ? rootResolved
+      : rootResolved + path.sep
+    if (absolute !== rootResolved && !absolute.startsWith(rootPrefix)) {
+      return reply.status(403).send({ error: 'Path is outside the project root' })
+    }
+
+    if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
+      return reply.status(404).send({ error: 'File not found' })
+    }
+
+    let content: string
+    try {
+      content = fs.readFileSync(absolute, 'utf-8')
+    } catch {
+      return reply.status(404).send({ error: 'File not found' })
+    }
+
+    if (content.includes('\0') || content.length > 1_500_000) {
+      return reply.status(413).send({ error: 'File too large or binary' })
+    }
+
+    return {
+      path: relativePath,
+      name: path.basename(relativePath),
+      content,
+    }
   })
 
   app.get('/api/search', async (req) => {

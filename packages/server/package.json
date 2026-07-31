@@ -1,6 +1,6 @@
 {
   "name": "@tech-debt/server",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Fastify server for tech-debt explorer",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,7 +25,7 @@
     "@fastify/cors": "^11.3.0",
     "@fastify/static": "^10.1.2",
     "@fastify/websocket": "^11.3.0",
-    "@tech-debt/core": "0.2.1",
+    "@tech-debt/core": "0.2.2",
     "chokidar": "^5.0.0",
     "fastify": "^5.10.0",
     "open": "^11.0.0"

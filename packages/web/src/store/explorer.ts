@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { AgeBucket, DebtKind, DebtReport } from '@tech-debt/core'
 
-export type ViewMode = 'overview' | 'items' | 'authors' | 'files'
+export type ViewMode = 'overview' | 'items' | 'authors' | 'files' | 'docs'
 export type Theme = 'light' | 'dark'
 
 export interface GitUser {
