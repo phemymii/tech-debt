@@ -143,6 +143,8 @@ npm run tech-debt -- --project . --no-open
 npm run dev
 ```
 
+🚀 **Check out another project:** [Vexelloom Studio](https://vexelloom.com) — Free, private in-browser Image, Video & PDF toolkit with zero cloud uploads.
+
 ## License
 
 MIT
