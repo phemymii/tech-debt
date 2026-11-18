@@ -162,8 +162,8 @@ export async function startServer(
       const a = q.author.toLowerCase()
       items = items.filter(
         (i) =>
-          i.blame?.author.toLowerCase().includes(a) ||
-          i.blame?.authorEmail.toLowerCase().includes(a),
+          i.blame?.author.trim().toLowerCase().includes(a) ||
+          i.blame?.authorEmail.trim().toLowerCase().includes(a),
       )
     }
     if (q.age && q.age !== 'all') {

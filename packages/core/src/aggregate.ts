@@ -32,13 +32,20 @@ export function emptyAgeCounts(): Record<AgeBucket, number> {
   }
 }
 
+function authorKey(author: string, email: string): string {
+  const normalizedEmail = email.trim().toLowerCase()
+  return normalizedEmail
+    ? `email:${normalizedEmail}`
+    : `name:${author.trim().toLowerCase()}`
+}
+
 export function buildAuthors(items: DebtItem[]): AuthorDebt[] {
   const map = new Map<string, AuthorDebt>()
 
   for (const item of items) {
     const author = item.blame?.author ?? 'Unknown'
-    const email = item.blame?.authorEmail ?? ''
-    const key = `${author}|${email}`
+    const email = item.blame?.authorEmail.trim().toLowerCase() ?? ''
+    const key = authorKey(author, email)
 
     let entry = map.get(key)
     if (!entry) {
@@ -75,7 +82,14 @@ export function buildAuthors(items: DebtItem[]): AuthorDebt[] {
         : Math.round(ages.reduce((a, b) => a + b, 0) / ages.length)
   }
 
-  return [...map.values()].sort((a, b) => b.total - a.total)
+  return [...map.values()].sort((a, b) => {
+    if (a.authorEmail && b.authorEmail) {
+      return a.authorEmail.localeCompare(b.authorEmail)
+    }
+    if (a.authorEmail) return -1
+    if (b.authorEmail) return 1
+    return a.author.localeCompare(b.author)
+  })
 }
 
 export function buildFiles(items: DebtItem[]): FileDebt[] {
@@ -143,7 +157,7 @@ export function buildStats(
     byAge[item.ageBucket]++
     if (item.blame) {
       blamed++
-      authors.add(`${item.blame.author}|${item.blame.authorEmail}`)
+      authors.add(authorKey(item.blame.author, item.blame.authorEmail))
       ages.push(item.blame.ageDays)
     }
   }

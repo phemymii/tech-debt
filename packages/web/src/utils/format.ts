@@ -62,7 +62,9 @@ export function matchesGitUser(
   if (!user || !item.blame) return false
   const email = user.email?.trim().toLowerCase()
   const name = user.name?.trim().toLowerCase()
-  if (email && item.blame.authorEmail?.toLowerCase() === email) return true
+  if (email && item.blame.authorEmail.trim().toLowerCase() === email) {
+    return true
+  }
   if (name && item.blame.author?.toLowerCase() === name) return true
   return false
 }
@@ -87,8 +89,8 @@ export function filterItems(
       return false
     if (opts.mine && !matchesGitUser(item, opts.gitUser)) return false
     if (author) {
-      const blameAuthor = item.blame?.author.toLowerCase() ?? ''
-      const blameEmail = item.blame?.authorEmail.toLowerCase() ?? ''
+      const blameAuthor = item.blame?.author.trim().toLowerCase() ?? ''
+      const blameEmail = item.blame?.authorEmail.trim().toLowerCase() ?? ''
       if (!blameAuthor.includes(author) && !blameEmail.includes(author)) {
         return false
       }

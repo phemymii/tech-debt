@@ -38,7 +38,7 @@ export function AuthorsView() {
               key={`${author.author}|${author.authorEmail}`}
               type="button"
               onClick={() => {
-                setFilterAuthor(author.author)
+                setFilterAuthor(author.authorEmail || author.author)
                 setViewMode('items')
                 const first = author.items[0]
                 if (first) selectItem(first)

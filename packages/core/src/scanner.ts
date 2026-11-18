@@ -251,7 +251,9 @@ export function getAuthorDebt(
 ): { author: DebtReport['authors'][number]; items: DebtItem[] } | null {
   const entry =
     report.authors.find(
-      (a) => a.author === author || a.authorEmail === author,
+      (a) =>
+        a.author.trim().toLowerCase() === author.trim().toLowerCase() ||
+        a.authorEmail === author.trim().toLowerCase(),
     ) ?? null
   if (!entry) return null
   const items = report.items.filter((i) => entry.items.includes(i.id))
